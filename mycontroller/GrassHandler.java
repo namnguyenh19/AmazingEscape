@@ -12,7 +12,6 @@ import java.util.HashMap;
  */
 public class GrassHandler extends TrapHandler{
 
-    public static final int PATHCOST = 2;
     private WorldSpatial.RelativeDirection[] POSSIBLEDIR = {WorldSpatial.RelativeDirection.LEFT, WorldSpatial.RelativeDirection.RIGHT};
 
     public GrassHandler(Car car, String type, Coordinate dest, boolean blocked, HashMap<Coordinate, MapTile> view){
