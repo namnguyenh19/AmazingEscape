@@ -12,7 +12,6 @@ import java.util.HashMap;
 public class MudHandler extends TrapHandler {
     public static final float SPEED_REDUCE = 0.6f;
     private int numMuds;
-    public static final int PATHCOST = 10;
 
     public MudHandler(Car car, String type, Coordinate dest, boolean blocked, HashMap<Coordinate, MapTile> view){
         super(car,type,dest,blocked,view);

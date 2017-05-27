@@ -16,6 +16,10 @@ public class Path {
     private ArrayList<Coordinate> titles;
     private boolean hasTrap;
 
+    public static final int GRASS_COST = 2;
+    public static final int LAVA_COST = 100;
+    public static final int MUD_COST = 10;
+
     public double calculatePathCost(){
         return 0;
     }
