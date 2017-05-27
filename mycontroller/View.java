@@ -13,8 +13,11 @@ import java.util.HashMap;
 public class View {
     private HashMap<Coordinate, MapTile> curView;
     private WorldSpatial.Direction curDir;
+    private Coordinate currentPosition;
     private boolean canUTurn;
     private boolean canThreePoint;
+    // How many minimum units the wall is away from the player.
+    private int wallSensitivity = 2;
 
 
     public View(HashMap<Coordinate, MapTile> view, WorldSpatial.Direction dir){
@@ -25,19 +28,19 @@ public class View {
     /**
      * Check if you have a wall in front of you!
      * @param orientation the orientation we are in based on WorldSpatial
-     * @param currentView what the car can currently see
+     * @param curView what the car can currently see
      * @return
      */
-    private boolean checkWallAhead(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView){
+    private boolean checkWallAhead(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> curView){
         switch(orientation){
             case EAST:
-                return checkEast(currentView);
+                return checkEast();
             case NORTH:
-                return checkNorth(currentView);
+                return checkNorth();
             case SOUTH:
-                return checkSouth(currentView);
+                return checkSouth();
             case WEST:
-                return checkWest(currentView);
+                return checkWest();
             default:
                 return false;
 
@@ -47,20 +50,20 @@ public class View {
     /**
      * Check if the wall is on your left hand side given your orientation
      * @param orientation
-     * @param currentView
+     * @param curView
      * @return
      */
-    private boolean checkFollowingWall(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView) {
+    private boolean checkFollowingWall(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> curView) {
 
         switch(orientation){
             case EAST:
-                return checkNorth(currentView);
+                return checkNorth();
             case NORTH:
-                return checkWest(currentView);
+                return checkWest();
             case SOUTH:
-                return checkEast(currentView);
+                return checkEast();
             case WEST:
-                return checkSouth(currentView);
+                return checkSouth();
             default:
                 return false;
         }
@@ -93,5 +96,55 @@ public class View {
         return null;
     }
 
+    /**
+     * Method below just iterates through the list and check in the correct coordinates.
+     * i.e. Given your current position is 10,10
+     * checkEast will check up to wallSensitivity amount of tiles to the right.
+     * checkWest will check up to wallSensitivity amount of tiles to the left.
+     * checkNorth will check up to wallSensitivity amount of tiles to the top.
+     * checkSouth will check up to wallSensitivity amount of tiles below.
+     */
+    public boolean checkEast(){
+        // Check tiles to my right
+        for(int i = 0; i <= wallSensitivity; i++){
+            MapTile tile = this.curView.get(new Coordinate(currentPosition.x+i, currentPosition.y));
+            if(tile.getName().equals("Wall")){
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public boolean checkWest(){
+        // Check tiles to my left
+        for(int i = 0; i <= wallSensitivity; i++){
+            MapTile tile = this.curView.get(new Coordinate(currentPosition.x-i, currentPosition.y));
+            if(tile.getName().equals("Wall")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkNorth(){
+        // Check tiles to towards the top
+        for(int i = 0; i <= wallSensitivity; i++){
+            MapTile tile = this.curView.get(new Coordinate(currentPosition.x, currentPosition.y+i));
+            if(tile.getName().equals("Wall")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkSouth(){
+        // Check tiles towards the bottom
+        for(int i = 0; i <= wallSensitivity; i++){
+            MapTile tile = this.curView.get(new Coordinate(currentPosition.x, currentPosition.y-i));
+            if(tile.getName().equals("Wall")){
+                return true;
+            }
+        }
+        return false;
+    }
 }

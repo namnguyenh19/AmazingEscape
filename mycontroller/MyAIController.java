@@ -13,9 +13,6 @@ import java.util.Queue;
 public class MyAIController extends CarController{
 
 	Queue<Move> actions;
-	// How many minimum units the wall is away from the player.
-	private int wallSensitivity = 2;
-
 
 	private boolean isFollowingWall = false; // This is initialized when the car sticks to a wall.
 	private WorldSpatial.RelativeDirection lastTurnDirection = null; // Shows the last turn direction the car takes.
@@ -39,72 +36,73 @@ public class MyAIController extends CarController{
 	@Override
 	public void update(float delta) {
 
-		// Gets what the car can see
-		HashMap<Coordinate, MapTile> currentView = getView();
-
-
-		checkStateChange();
-
-
-		// If you are not following a wall initially, find a wall to stick to!
-		if(!isFollowingWall){
-			if(getVelocity() < CAR_SPEED){
-				applyForwardAcceleration();
-			}
-			// Turn towards the north
-			if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
-				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
-				applyLeftTurn(getOrientation(),delta);
-			}
-			if(checkNorth(currentView)){
-				// Turn right until we go back to east!
-				if(!getOrientation().equals(WorldSpatial.Direction.EAST)){
-					lastTurnDirection = WorldSpatial.RelativeDirection.RIGHT;
-					applyRightTurn(getOrientation(),delta);
-				}
-				else{
-					isFollowingWall = true;
-				}
-			}
-		}
-		// Once the car is already stuck to a wall, apply the following logic
-		else{
-
-			// Readjust the car if it is misaligned.
-			readjust(lastTurnDirection,delta);
-
-			if(isTurningRight){
-				applyRightTurn(getOrientation(),delta);
-			}
-			else if(isTurningLeft){
-				// Apply the left turn if you are not currently near a wall.
-				if(!checkFollowingWall(getOrientation(),currentView)){
-					applyLeftTurn(getOrientation(),delta);
-				}
-				else{
-					isTurningLeft = false;
-				}
-			}
-			// Try to determine whether or not the car is next to a wall.
-			else if(checkFollowingWall(getOrientation(),currentView)){
-				// Maintain some velocity
-				if(getVelocity() < CAR_SPEED){
-					applyForwardAcceleration();
-				}
-				// If there is wall ahead, turn right!
-				if(checkWallAhead(getOrientation(),currentView)){
-					lastTurnDirection = WorldSpatial.RelativeDirection.RIGHT;
-					isTurningRight = true;
-
-				}
-
-			}
-			// This indicates that I can do a left turn if I am not turning right
-			else{
-				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
-				isTurningLeft = true;
-			}
-		}
+		//TODO replace with View and Path logic
+//		// Gets what the car can see
+//		HashMap<Coordinate, MapTile> currentView = getView();
+//
+//
+//		checkStateChange();
+//
+//
+//		// If you are not following a wall initially, find a wall to stick to!
+//		if(!isFollowingWall){
+//			if(getVelocity() < CAR_SPEED){
+//				applyForwardAcceleration();
+//			}
+//			// Turn towards the north
+//			if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
+//				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
+//				applyLeftTurn(getOrientation(),delta);
+//			}
+//			if(checkNorth(currentView)){
+//				// Turn right until we go back to east!
+//				if(!getOrientation().equals(WorldSpatial.Direction.EAST)){
+//					lastTurnDirection = WorldSpatial.RelativeDirection.RIGHT;
+//					applyRightTurn(getOrientation(),delta);
+//				}
+//				else{
+//					isFollowingWall = true;
+//				}
+//			}
+//		}
+//		// Once the car is already stuck to a wall, apply the following logic
+//		else{
+//
+//			// Readjust the car if it is misaligned.
+//			readjust(lastTurnDirection,delta);
+//
+//			if(isTurningRight){
+//				applyRightTurn(getOrientation(),delta);
+//			}
+//			else if(isTurningLeft){
+//				// Apply the left turn if you are not currently near a wall.
+//				if(!checkFollowingWall(getOrientation(),currentView)){
+//					applyLeftTurn(getOrientation(),delta);
+//				}
+//				else{
+//					isTurningLeft = false;
+//				}
+//			}
+//			// Try to determine whether or not the car is next to a wall.
+//			else if(checkFollowingWall(getOrientation(),currentView)){
+//				// Maintain some velocity
+//				if(getVelocity() < CAR_SPEED){
+//					applyForwardAcceleration();
+//				}
+//				// If there is wall ahead, turn right!
+//				if(checkWallAhead(getOrientation(),currentView)){
+//					lastTurnDirection = WorldSpatial.RelativeDirection.RIGHT;
+//					isTurningRight = true;
+//
+//				}
+//
+//			}
+//			// This indicates that I can do a left turn if I am not turning right
+//			else{
+//				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
+//				isTurningLeft = true;
+//			}
+//		}
 
 
 
@@ -273,63 +271,6 @@ public class MyAIController extends CarController{
 
 		}
 
-	}
-
-
-	/**
-	 * Method below just iterates through the list and check in the correct coordinates.
-	 * i.e. Given your current position is 10,10
-	 * checkEast will check up to wallSensitivity amount of tiles to the right.
-	 * checkWest will check up to wallSensitivity amount of tiles to the left.
-	 * checkNorth will check up to wallSensitivity amount of tiles to the top.
-	 * checkSouth will check up to wallSensitivity amount of tiles below.
-	 */
-	public boolean checkEast(HashMap<Coordinate, MapTile> currentView){
-		// Check tiles to my right
-		Coordinate currentPosition = new Coordinate(getPosition());
-		for(int i = 0; i <= wallSensitivity; i++){
-			MapTile tile = currentView.get(new Coordinate(currentPosition.x+i, currentPosition.y));
-			if(tile.getName().equals("Wall")){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean checkWest(HashMap<Coordinate,MapTile> currentView){
-		// Check tiles to my left
-		Coordinate currentPosition = new Coordinate(getPosition());
-		for(int i = 0; i <= wallSensitivity; i++){
-			MapTile tile = currentView.get(new Coordinate(currentPosition.x-i, currentPosition.y));
-			if(tile.getName().equals("Wall")){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean checkNorth(HashMap<Coordinate,MapTile> currentView){
-		// Check tiles to towards the top
-		Coordinate currentPosition = new Coordinate(getPosition());
-		for(int i = 0; i <= wallSensitivity; i++){
-			MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y+i));
-			if(tile.getName().equals("Wall")){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean checkSouth(HashMap<Coordinate,MapTile> currentView){
-		// Check tiles towards the bottom
-		Coordinate currentPosition = new Coordinate(getPosition());
-		for(int i = 0; i <= wallSensitivity; i++){
-			MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y-i));
-			if(tile.getName().equals("Wall")){
-				return true;
-			}
-		}
-		return false;
 	}
 
 }
