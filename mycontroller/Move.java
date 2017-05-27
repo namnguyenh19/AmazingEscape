@@ -9,6 +9,7 @@ import world.WorldSpatial;
 public class Move {
     Coordinate dest;
     WorldSpatial.Direction orientation;
+    /** Desired turn angle. */
     float angle;
     boolean reverse;
 
