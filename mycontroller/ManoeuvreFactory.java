@@ -14,7 +14,28 @@ public class ManoeuvreFactory {
     public static List<Move> threePointTurn(MyAIController ctrl, Coordinate dest) {
     	List<Move> ret = new ArrayList<Move>();
     	
-        return null;
+    	// MOVE 1:
+    	Coordinate newCoordAdd = addCoords(toCoordinate(ctrl.getOrientation()),
+    				toCoordinate(getClockwiseDirection(ctrl.getOrientation())));
+    	Coordinate newCoord = addCoords(new Coordinate(ctrl.getPosition()), newCoordAdd);
+    	float newAngle = toPrincipalAngle((float)Math.toDegrees(Math.atan2(newCoordAdd.x, newCoordAdd.y)));
+    	Direction newOrient = getClockwiseDirection(ctrl.getOrientation());
+    	
+    	ret.add(new Move(newCoord,newOrient, newAngle, false));
+    	
+    	
+    	// MOVE 2
+    	newCoord = addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(ctrl.getOrientation()));
+    	newAngle = toPrincipalAngle(newAngle - 180);
+    	
+    	ret.add(new Move(newCoord, newOrient, newAngle, true));
+    	
+    	// HEAD TO DESTINATION
+    	newOrient = getOppositeOrientation(ctrl.getOrientation());
+    	ret.add(new Move(dest, newOrient, toAngle(newOrient), false));
+    	
+    	
+        return ret;
     }
 
     public static List<Move> uTurn(MyAIController ctrl, Coordinate dest) {
@@ -24,13 +45,14 @@ public class ManoeuvreFactory {
     	// this needs to be checked by an external function, if not checked here
     	
     	// MOVE 1: /
-    	Coordinate newDir = getUnitCoordinate(ctrl.getOrientation());
+    	Coordinate newDir = toCoordinate(ctrl.getOrientation());
     	Coordinate newCoord = addCoords(newDir, new Coordinate(ctrl.getPosition()));
     	float newAngle = toPrincipalAngle(toAngle(ctrl.getOrientation()) - 45);
     	ret.add(new Move(newCoord, ctrl.getOrientation(), newAngle, false));
     	
     	// MOVE 2: --
-    	newDir = getUnitCoordinate(getClockwiseDirection(ctrl.getOrientation()));
+    	// TODO: This may not be needed, depending on the cars speed, and can be implied.
+    	newDir = toCoordinate(getClockwiseDirection(ctrl.getOrientation()));
     	newCoord = addCoords(newCoord, newDir);
     	newAngle = toPrincipalAngle(newAngle - 45);
     	ret.add(new Move(newCoord, getClockwiseDirection(ctrl.getOrientation()), newAngle, false));
@@ -51,7 +73,9 @@ public class ManoeuvreFactory {
     	List<Move> ret = new ArrayList<Move>();
         
         // TODO: Should we add a check if the opposite orientation makes sense with our new dest?
-        ret.add(new Move(dest, getOppositeOrientation(ctrl.getOrientation()), 0, true));
+    	Direction newOrient = getOppositeOrientation(ctrl.getOrientation());
+    	
+        ret.add(new Move(dest, newOrient, toAngle(newOrient), true));
         return ret;
     }
 
@@ -106,7 +130,7 @@ public class ManoeuvreFactory {
     	}
     }
     
-    private static Coordinate getUnitCoordinate(WorldSpatial.Direction direction) {
+    private static Coordinate toCoordinate(WorldSpatial.Direction direction) {
     	if (direction == Direction.NORTH) {
     		return new Coordinate("0,1");
     	} else if (direction == Direction.SOUTH) {
