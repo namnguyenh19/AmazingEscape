@@ -75,11 +75,11 @@ public class MyAIController extends CarController{
 				
 				// TODO: do we need to find the dest variable?
 				if (currentView.isCanUTurn()) {
-					newMoves = ManoeuvreFactory.uTurn(this, dest);
+					newMoves = ManoeuvreFactory.uTurn(this);
 				} else if (currentView.isCanThreePoint()) {
-					newMoves = ManoeuvreFactory.threePointTurn(this, dest);
+					newMoves = ManoeuvreFactory.threePointTurn(this);
 				} else {
-					newMoves = ManoeuvreFactory.reverseTurn(this, dest);
+					newMoves = ManoeuvreFactory.reverseTurn(this);
 				}
 				
 				actions.addAll(newMoves);

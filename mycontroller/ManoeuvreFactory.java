@@ -8,37 +8,63 @@ import world.WorldSpatial;
 import world.WorldSpatial.Direction;
 
 /**
+ * Factory class for creating a list of atomic moves, representing movements
+ * such as a three-point turn.
+ * 
  * Created by NamNguyen1 on 27/5/17.
  */
 public class ManoeuvreFactory {
-    public static List<Move> threePointTurn(MyAIController ctrl, Coordinate dest) {
+	/*
+	 * Design flaw comment:
+	 * 
+	 * Previously in the class diagram, the parameter 'dest' was in threePointTurn,
+	 * uTurn and reverseTurn methods. We have removed this, during our implementation,
+	 * for a few reasons:
+	 * 
+	 * 1. The three manoeuvres we have to implementat are mainly used for dealing
+	 * with dead-ends. Thus, the destination can be determined when we hit a wall during
+	 * a U-turn, 3-point turn etc.
+	 * 
+	 * 2. No other class is determining the 'dest' parameter in our diagrams, as View class
+	 * only checks if we can do these manoevure's.
+	 * 
+	 */
+	
+	
+    public static List<Move> threePointTurn(MyAIController ctrl) {
     	List<Move> ret = new ArrayList<Move>();
     	
     	// MOVE 1:
     	Coordinate newCoordAdd = addCoords(toCoordinate(ctrl.getOrientation()),
     				toCoordinate(getClockwiseDirection(ctrl.getOrientation())));
-    	Coordinate newCoord = addCoords(new Coordinate(ctrl.getPosition()), newCoordAdd);
+    	
+    	Coordinate newCoord = addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(ctrl.getOrientation()));
+    	newCoord = addCoords(newCoord, toCoordinate(getClockwiseDirection(ctrl.getOrientation())));
+
+    	while (!ctrl.getView().get(newCoord).getName().equals("Wall")) {
+    		newCoord = addCoords(newCoord, toCoordinate(getClockwiseDirection(ctrl.getOrientation())));
+    	}
+    	
     	float newAngle = toPrincipalAngle((float)Math.toDegrees(Math.atan2(newCoordAdd.x, newCoordAdd.y)));
     	Direction newOrient = getClockwiseDirection(ctrl.getOrientation());
     	
-    	ret.add(new Move(newCoord,newOrient, newAngle, false));
+    	ret.add(new Move(newCoord, newOrient, newAngle, false));
     	
     	
     	// MOVE 2
-    	newCoord = addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(ctrl.getOrientation()));
-    	newAngle = toPrincipalAngle(newAngle - 180);
-    	
-    	ret.add(new Move(newCoord, newOrient, newAngle, true));
+    	ret.add(new Move(addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(ctrl.getOrientation())),
+    			newOrient, toPrincipalAngle(newAngle - 180), true));
     	
     	// HEAD TO DESTINATION
     	newOrient = getOppositeDir(ctrl.getOrientation());
-    	ret.add(new Move(dest, newOrient, toAngle(newOrient), false));
+    	newCoord = addCoords(newCoord, toCoordinate(newOrient));
+    	ret.add(new Move(newCoord, newOrient, toAngle(newOrient), false));
     	
     	
         return ret;
     }
 
-    public static List<Move> uTurn(MyAIController ctrl, Coordinate dest) {
+    public static List<Move> uTurn(MyAIController ctrl) {
     	List<Move> ret = new ArrayList<Move>();
     	
     	// assume we have a row of 3 tiles in the car's direction to make u-turn
@@ -53,9 +79,17 @@ public class ManoeuvreFactory {
     	// MOVE 2: --
     	// TODO: This may not be needed, depending on the cars speed, and can be implied.
     	newDir = toCoordinate(getClockwiseDirection(ctrl.getOrientation()));
-    	newCoord = addCoords(newCoord, newDir);
     	newAngle = toPrincipalAngle(newAngle - 45);
-    	ret.add(new Move(newCoord, getClockwiseDirection(ctrl.getOrientation()), newAngle, false));
+    	
+    	while (!ctrl.getView().get(newCoord).getName().equals("Wall")) {
+    		newCoord = addCoords(newCoord, newDir);
+    		
+    		if (ctrl.getView().get(newCoord).getName().equals("Wall")) {
+    			break;
+    		}
+    		
+        	ret.add(new Move(newCoord, getClockwiseDirection(ctrl.getOrientation()), newAngle, false));
+    	}
     	
     	// MOVE 3: \
     	newCoord = addCoords(newCoord, newDir);
@@ -63,17 +97,19 @@ public class ManoeuvreFactory {
     	ret.add(new Move(newCoord, getClockwiseDirection(ctrl.getOrientation()), newAngle, false));
     	
     	// HEAD TO DESTINATION
+    	newCoord = addCoords(newCoord, toCoordinate(getOppositeDir(ctrl.getOrientation())));
     	newAngle = toPrincipalAngle(newAngle - 45);
-    	ret.add(new Move(dest, ctrl.getOrientation(), newAngle, false));
+    	ret.add(new Move(newCoord, getOppositeDir(ctrl.getOrientation()), newAngle, false));
     	
         return ret;
     }
 
-    public static List<Move> reverseTurn(MyAIController ctrl, Coordinate dest) {
+    public static List<Move> reverseTurn(MyAIController ctrl) {
     	List<Move> ret = new ArrayList<Move>();
         
         // TODO: Should we add a check if the opposite orientation makes sense with our new dest?
     	Direction newOrient = getOppositeDir(ctrl.getOrientation());
+    	Coordinate dest = addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(newOrient));
     	
         ret.add(new Move(dest, newOrient, toAngle(newOrient), true));
         return ret;
