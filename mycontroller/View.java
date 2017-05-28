@@ -46,9 +46,10 @@ public class View {
         return curPos;
     }
 
-    public View(HashMap<Coordinate, MapTile> view, WorldSpatial.Direction dir){
+    public View(HashMap<Coordinate, MapTile> view, WorldSpatial.Direction dir, Coordinate pos){
         this.curDir = dir;
         this.curView = view;
+        this.curPos = pos;
     }
 
     /**

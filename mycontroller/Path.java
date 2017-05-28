@@ -29,6 +29,7 @@ public class Path {
         this.view = view;
         this.tiles = tiles;
         this.orientation = orient;
+        this.tileName = new HashMap<>();
         translateTileName();
     }
     

@@ -72,7 +72,8 @@ public class MyAIController extends CarController{
 	public void update(float delta) {
 		// TODO: replace with View and Path logic
 		// Retrieve local surrounding of car, to be fed into View class to interpret it
-		View currentView = new View(getView(), this.getOrientation());
+		
+		View currentView = new View(getView(), this.getOrientation(), getCurPos());
 		checkStateChange();
 		
 		if (!prevLocation.equals(new Coordinate(this.getPosition()))) {
@@ -373,5 +374,9 @@ public class MyAIController extends CarController{
 		}
 
 	}
-
+	
+	
+	private Coordinate getCurPos(){
+		return new Coordinate(getPosition());
+	}
 }
