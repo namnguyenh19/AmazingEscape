@@ -131,10 +131,10 @@ public class ManoeuvreFactory {
     	// car position
     	Coordinate currentPos = new Coordinate(ctrl.getPosition());
     	
-    	for (Coordinate c : path.getTilesInPath()) {
-    		// calculate angle between currentPos and next destination
-    		float angle = (float)Math.toDegrees(Math.atan2(c.y - currentPos.y, c.x - currentPos.x));
-    		angle = toPrincipalAngle(angle);
+    	for (int i = 0; i < path.getTilesInPath().size(); i++) { 
+    		Coordinate c = path.getTilesInPath().get(i);
+    		float angle = getAngleTwoPts(currentPos, c);
+    		
     		Direction orientation;
     	    
     	    // TODO: Do we even need to record this??
@@ -172,6 +172,14 @@ public class ManoeuvreFactory {
      */
     private static float toPrincipalAngle(float angle) {
     	return (angle + 360) % 360;
+    }
+    
+    /**
+     * Retrieve the principal angle between two points.
+     */
+    private static float getAngleTwoPts(Coordinate start, Coordinate end) {
+    	float angle = (float)Math.toDegrees(Math.atan2(end.y - start.y, end.x - start.x));
+		return toPrincipalAngle(angle); 
     }
     
     private static Coordinate addCoords(Coordinate c1, Coordinate c2) {
