@@ -20,6 +20,9 @@ public class View {
     // distance to each direction the car can see
     public static final int VIEW_SQUARE = 3;
 
+    public Coordinate getCurPos() {
+        return curPos;
+    }
 
     public View(HashMap<Coordinate, MapTile> view, WorldSpatial.Direction dir){
         this.curDir = dir;
@@ -48,7 +51,7 @@ public class View {
     /**
      * Check if the wall is on your left hand side given your orientation
      */
-    private boolean checkFollowingWall() {
+    public boolean checkFollowingWall() {
 
         switch(this.curDir){
             case EAST:
@@ -105,11 +108,19 @@ public class View {
     /**
      * Check if there is enough space to do U Turn and/or Three Point
      */
-    public void checkSpace(){
-
+    public boolean checkSpace() {
+        // We need at least two tiles ahead
+        for (int i = 1; i < 3; i++) {
+            Coordinate coor = new Coordinate(this.curPos.x + i, this.curPos.y);
+            MapTile tile = this.curView.get(coor);
+            if(tile.getName().equals("Wall")) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    public ArrayList<Path> getPaths(){
+    public ArrayList<Path> getPaths() {
         return null;
     }
 
@@ -297,7 +308,7 @@ public class View {
         return false;
     }
 
-    private boolean checkSouth(Coordinate coor){
+    public boolean checkSouth(Coordinate coor){
         // Check tiles towards the bottom
         for(int i = 0; i < VIEW_SQUARE; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y-i));
