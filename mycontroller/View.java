@@ -133,6 +133,14 @@ public class View {
             return null;
         }
 
+        switch (this.curDir){
+            case EAST:
+                return getPathsEast();
+            case WEST:
+                return getPathsWest();
+            case NORTH:
+                
+        }
 
     }
 
@@ -144,9 +152,40 @@ public class View {
         ArrayList<Path> paths = new ArrayList<>();
 
         if (checkCornerAhead()){
-            Coordinate corner;
+            Coordinate corner = curPos;
+            boolean found = false;
 
+            //find Wall
+            for (int i = 1; i <= VIEW_SQUARE && !found; i++){
+                for(int j = 1; j < VIEW_SQUARE; j++){
+                    corner = new Coordinate(curPos.x + j, curPos.y + i);
+                    MapTile tile = this.curView.get(corner);
+                    if (tile.getName().equals("Wall")){
+                        if (isCorner(corner, this.curDir)){
+                            found = true;
+                            break;
+                        }
+                    }
 
+                }
+            }
+
+            int leftDistance = corner.y - curPos.y;
+            int distance = corner.x - curPos.x;
+            ArrayList<Coordinate> tiles = new ArrayList<>();
+
+            for (int i = 1; i <= distance+1; i++){
+                Coordinate coor = new Coordinate(curPos.x+i,curPos.y);
+                tiles.add(coor);
+            }
+            for (int j = 1; j <= leftDistance; j++){
+                Coordinate coor = new Coordinate(curPos.x + distance + 1, curPos.y + j);
+                tiles.add(coor);
+            }
+
+            paths.add(new Path(this.curView, tiles));
+
+            return paths;
         }
         else {
             //car is going straight
@@ -183,7 +222,7 @@ public class View {
 
             //check right side of car
             for(int i = 1; i <= VIEW_SQUARE; i++){
-                Coordinate right = new Coordinate(curPos.x, curPos.y+i);
+                Coordinate right = new Coordinate(curPos.x, curPos.y-i);
 
                 MapTile tile = curView.get(right);
                 if (tile.getName().equals("Wall")){
@@ -193,8 +232,8 @@ public class View {
 
             }
 
-            //adding paths to the right
-            for (int i = 1; i < rightWalldistance; i++){
+            //adding paths to the right and middle
+            for (int i = 0; i < rightWalldistance; i++){
                 for(int j = 1; j <= VIEW_SQUARE; j++){
                     Coordinate coor = new Coordinate(curPos.x + j, curPos.y - i);
                     rightTiles.add(coor);
@@ -208,6 +247,158 @@ public class View {
         }
     }
 
+    private ArrayList<Path> getPathsWest(){
+        ArrayList<Path> paths = new ArrayList<>();
+
+        if (checkCornerAhead()){
+            Coordinate corner = curPos;
+            boolean found = false;
+
+            //find Wall
+            for (int i = 1; i <= VIEW_SQUARE && !found; i++){
+                for(int j = 1; j < VIEW_SQUARE; j++){
+                    corner = new Coordinate(curPos.x - j, curPos.y - i);
+                    MapTile tile = this.curView.get(corner);
+                    if (tile.getName().equals("Wall")){
+                        if (isCorner(corner, this.curDir)){
+                            found = true;
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+            int leftDistance = corner.y - curPos.y;
+            int distance = corner.x - curPos.x;
+            ArrayList<Coordinate> tiles = new ArrayList<>();
+
+            for (int i = 1; i <= distance+1; i++){
+                Coordinate coor = new Coordinate(curPos.x-i,curPos.y);
+                tiles.add(coor);
+            }
+            for (int j = 1; j <= leftDistance; j++){
+                Coordinate coor = new Coordinate(curPos.x - distance - 1, curPos.y - j);
+                tiles.add(coor);
+            }
+
+            paths.add(new Path(this.curView, tiles));
+
+            return paths;
+        }
+        else {
+            //car is going straight
+            int leftWalldistance = 0;
+            int rightWalldistance = 0;
+
+            ArrayList<Coordinate> leftTiles = new ArrayList<>();
+            ArrayList<Coordinate> rightTiles = new ArrayList<>();
+
+            //check where wall is on each side
+
+            //check left side of car first
+            for(int i = 1; i <= VIEW_SQUARE; i++){
+                Coordinate left = new Coordinate(curPos.x, curPos.y-i);
+
+                MapTile tile = curView.get(left);
+                if (tile.getName().equals("Wall")){
+                    leftWalldistance = i;
+                    break;
+                }
+
+            }
+
+            //adding paths to the left
+            for (int i = 1; i < leftWalldistance; i++){
+                for(int j = 1; j <= VIEW_SQUARE; j++){
+                    Coordinate coor = new Coordinate(curPos.x - j, curPos.y - i);
+                    leftTiles.add(coor);
+                }
+
+                Path newPath = new Path(this.curView, leftTiles);
+                paths.add(newPath);
+            }
+
+            //check right side of car
+            for(int i = 1; i <= VIEW_SQUARE; i++){
+                Coordinate right = new Coordinate(curPos.x, curPos.y+i);
+
+                MapTile tile = curView.get(right);
+                if (tile.getName().equals("Wall")){
+                    rightWalldistance = i;
+                    break;
+                }
+
+            }
+
+            //adding paths to the right and middle
+            for (int i = 0; i < rightWalldistance; i++){
+                for(int j = 1; j <= VIEW_SQUARE; j++){
+                    Coordinate coor = new Coordinate(curPos.x - j, curPos.y + i);
+                    rightTiles.add(coor);
+                }
+
+                Path newPath = new Path(this.curView, rightTiles);
+                paths.add(newPath);
+            }
+
+            return paths;
+        }
+    }
+
+    /**
+     * @param coor coordinate of a Wall
+     * @param orientation orientation of the car
+     * @return is coor is a corner
+     */
+    private boolean isCorner(Coordinate coor, WorldSpatial.Direction orientation){
+        Coordinate next;
+        MapTile tile;
+        switch (orientation){
+            case EAST:
+                next = new Coordinate(coor.x+1, coor.y);
+                tile = this.curView.get(next);
+                if (!tile.getName().equals("Wall")){
+                    return true;
+                }
+                else {
+                    return false;
+                }
+                break;
+            case WEST:
+                next = new Coordinate(coor.x-1, coor.y);
+                tile = this.curView.get(next);
+                if (!tile.getName().equals("Wall")){
+                    return true;
+                }
+                else {
+                    return false;
+                }
+                break;
+            case SOUTH:
+                next = new Coordinate(coor.x, coor.y-1);
+                tile = this.curView.get(next);
+                if (!tile.getName().equals("Wall")){
+                    return true;
+                }
+                else {
+                    return false;
+                }
+                break;
+            case NORTH:
+                next = new Coordinate(coor.x, coor.y+1);
+                tile = this.curView.get(next);
+                if (!tile.getName().equals("Wall")){
+                    return true;
+                }
+                else {
+                    return false;
+                }
+                break;
+        }
+
+        return false;
+    }
 
     /**
      * Method below check for the space available in front of the car to do U Turn or ThreePoint Turn
