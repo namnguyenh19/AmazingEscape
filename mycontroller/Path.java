@@ -4,6 +4,7 @@ import tiles.MapTile;
 import utilities.Coordinate;
 import world.World;
 import world.WorldSpatial;
+import world.WorldSpatial.Direction;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -29,6 +30,11 @@ public class Path {
         this.tiles = tiles;
         this.orientation = orient;
         translateTileName();
+    }
+    
+    /** Get initial facing direction of car. */
+    public Direction getOrientation() {
+    	return orientation;
     }
 
     public double calculatePathCost(){

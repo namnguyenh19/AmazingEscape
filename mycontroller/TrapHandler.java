@@ -24,5 +24,5 @@ public abstract class TrapHandler {
         this.car = car;
     }
 
-    public abstract Path handleTrap();
+    public abstract boolean handleTrap(Path path);
 }
