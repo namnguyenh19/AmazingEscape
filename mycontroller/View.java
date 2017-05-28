@@ -138,9 +138,15 @@ public class View {
      * Three Point: checks for the following min space:   |space||car|
      */
 
-    private int checkSpace(){
+    private void checkSpace(){
         int spaceLeft = 0;
         int spaceRight = 0;
+
+        turnRight = false;
+        turnLeft = false;
+        canUTurn = false;
+        canThreePoint = false;
+        
         switch (this.curDir){
             case EAST:
                 spaceLeft = sideSpace(1, false);
@@ -163,6 +169,17 @@ public class View {
         if (spaceLeft >= 1){
             canThreePoint = true;
             turnLeft = true;
+            if (spaceLeft >= 2){
+                canUTurn = true;
+            }
+        }
+
+        if (spaceRight >= 1){
+            canThreePoint = true;
+            turnRight = true;
+            if (spaceRight >= 2){
+                canUTurn = true;
+            }
         }
     }
 
