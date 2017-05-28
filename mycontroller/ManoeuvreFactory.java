@@ -116,6 +116,11 @@ public class ManoeuvreFactory {
     	Direction newOrient = getOppositeDir(ctrl.getOrientation());
     	Coordinate dest = addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(newOrient));
     	
+    	// keep reversing until we exit a deadend (ie. we encounter a tile we haven't visited before)
+    	while (ctrl.getVisitedTiles().contains(dest)) {
+    		dest = addCoords(dest, toCoordinate(newOrient));
+    	}
+    	
         ret.add(new Move(dest, newOrient, toAngle(newOrient), true));
         return ret;
     }

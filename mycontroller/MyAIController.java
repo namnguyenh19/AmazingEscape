@@ -4,14 +4,37 @@ import controller.CarController;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
+import world.WorldSpatial.Direction;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+/**
+ *
+ * Our AI auto-controller.
+ *
+ */
 public class MyAIController extends CarController{
-
+	/*
+	 * Design flaw comment:
+	 * 
+	 * There are some deviations from our initial class diagram:
+	 * 
+	 * 1. applyMove(..) now has a delta parameter and no longer a move attribute.
+	 * We have forgotten to consider that the turn methods needed a delta value.
+	 * We encountered another problem of our controller requiring to remember the next destination
+	 * once executing a Move.
+	 * 
+	 * To fix this, we hold a 'currentDest' which holds the desired destination, and we hold
+	 * our current Move order until we reach currentDest, which then we can remove it from queue.
+	 * 
+	 * 
+	 * 
+	 */
+	
+	
 	Queue<Move> actions;
 
 	private boolean isFollowingWall = false; // This is initialized when the car sticks to a wall.
@@ -22,16 +45,23 @@ public class MyAIController extends CarController{
 
 	// Car Speed to move at
 	private final float CAR_SPEED = 3;
+	
+	private static final float ROTATE_EPSILON = 3;
 
 	// Offset used to differentiate between 0 and 360 degrees
 	private int EAST_THRESHOLD = 3;
 
-	private ArrayList<Coordinate> visited;
+	private List<Coordinate> visited;
+	private Coordinate currentDest;
 
 	public MyAIController(Car car) {
 		super(car);
 		
 		actions = new LinkedList<Move>();
+		visited = new ArrayList<Coordinate>();
+		currentDest = new Coordinate(car.getPosition());
+		
+		visited.add(currentDest);
 	}
 
 
@@ -43,27 +73,18 @@ public class MyAIController extends CarController{
 		checkStateChange();
 		
 		if (actions.size() > 0) {
-			this.applyMove(actions.poll());
+			this.applyMove(delta);
 			return;
 		}
 
 		// If you are not following a wall initially, find a wall to stick to!
-		if(!currentView.checkFollowingWall()) {
-			if (getVelocity() < CAR_SPEED) {
-				applyForwardAcceleration();
-			}
-			
+		if(!currentView.checkFollowingWall()) {	
 			// Turn to a direction so that when we hit a wall, we can turn
 			// to left of the wall
 			actions.addAll(ManoeuvreFactory.followWall(this));
 		}
 		// Once the car is already stuck to a wall, apply the following logic
 		else {
-			// TODO: ??
-			if (getVelocity() < CAR_SPEED) {
-				applyForwardAcceleration();
-			}
-			
 			boolean cornerAhead = currentView.checkCornerAhead();
 			boolean nearDeadEnd = currentView.checkDeadEnd();
 			List<Move> newMoves = null;
@@ -131,13 +152,39 @@ public class MyAIController extends CarController{
 		}
 	}
 	
-	private void applyMove(Move move) {
-		// TODO: This is a stub method
+	private void applyMove(float delta) {
+		Move move = actions.peek();
+		
+		// if current Move has been done due to reaching dest
+		if (move.dest.equals(new Coordinate(this.getPosition()))) {
+			visited.add(actions.poll().dest);
+			move = actions.peek();
+		}
+		
+		if (Math.abs(this.getAngle() - move.angle) > ROTATE_EPSILON) {
+			// TODO: simple code, assumes the car is facing in the angle to do this
+			// TODO: need to test for reverse case
+			if (move.orientation == Direction.WEST || move.orientation == Direction.SOUTH) {
+				this.turnLeft(delta);
+			} else {
+				this.turnRight(delta);
+			}
+		}
+		
+		if (move.reverse && getVelocity() > -CAR_SPEED) {
+			this.applyReverseAcceleration();
+		} else if (getVelocity() < CAR_SPEED) {
+			this.applyForwardAcceleration();
+		}
 	}
 	
 	private Path findBestPath(List<Path> paths) {
 		// TODO: This is a stub method
 		return null;
+	}
+	
+	public List<Coordinate> getVisitedTiles() {
+		return visited;
 	}
 
 	/**
