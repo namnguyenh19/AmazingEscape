@@ -115,7 +115,7 @@ public class ManoeuvreFactory {
     }
     
     private static Coordinate addCoords(Coordinate c1, Coordinate c2) {
-    	return new Coordinate(Integer.toString(c1.x + c2.x) + "," + Integer.toString(c1.y + c2.y));
+    	return new Coordinate(c1.x + c2.x, c1.y + c2.y);
     }
     
     private static WorldSpatial.Direction getOppositeOrientation(WorldSpatial.Direction direction) {
@@ -132,13 +132,13 @@ public class ManoeuvreFactory {
     
     private static Coordinate toCoordinate(WorldSpatial.Direction direction) {
     	if (direction == Direction.NORTH) {
-    		return new Coordinate("0,1");
+    		return new Coordinate(0, 1);
     	} else if (direction == Direction.SOUTH) {
-    		return new Coordinate("0,-1");
+    		return new Coordinate(0, -1);
     	} else if (direction == Direction.EAST) {
-    		return new Coordinate("1,0");
+    		return new Coordinate(1, 0);
     	} else {
-    		return new Coordinate("-1,0");
+    		return new Coordinate(-1, 0);
     	}
     }
     
