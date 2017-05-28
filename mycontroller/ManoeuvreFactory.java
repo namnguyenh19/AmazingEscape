@@ -28,13 +28,18 @@ public class ManoeuvreFactory {
 	 * 2. No other class is determining the 'dest' parameter in our diagrams, as View class
 	 * only checks if we can do these manoevure's.
 	 * 
+	 * 
+	 * There are also private auxiliary methods in this class (not in class diagram) that we
+	 * found were needed in implementing, to simplify and handle mathematical calculations regarding
+	 * Coordinate and WorldSpatial.Direction
+	 * 
 	 */
 	
 	
     public static List<Move> threePointTurn(MyAIController ctrl) {
     	List<Move> ret = new ArrayList<Move>();
     	
-    	// MOVE 1:
+    	// MOVE 1: Hit against a wall, in the clockwise direction of car.
     	Coordinate newCoordAdd = addCoords(toCoordinate(ctrl.getOrientation()),
     				toCoordinate(getClockwiseDirection(ctrl.getOrientation())));
     	
@@ -51,11 +56,11 @@ public class ManoeuvreFactory {
     	ret.add(new Move(newCoord, newOrient, newAngle, false));
     	
     	
-    	// MOVE 2
+    	// MOVE 2: Now reverse so that the back of car almost hits the wall.
     	ret.add(new Move(addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(ctrl.getOrientation())),
     			newOrient, toPrincipalAngle(newAngle - 180), true));
     	
-    	// HEAD TO DESTINATION
+    	// MOVE 3: Now rotate so that we can exit the dead-end.
     	newOrient = getOppositeDir(ctrl.getOrientation());
     	newCoord = addCoords(newCoord, toCoordinate(newOrient));
     	ret.add(new Move(newCoord, newOrient, toAngle(newOrient), false));
@@ -70,14 +75,14 @@ public class ManoeuvreFactory {
     	// assume we have a row of 3 tiles in the car's direction to make u-turn
     	// this needs to be checked by an external function, if not checked here
     	
-    	// MOVE 1: /
+    	// MOVE 1: Prepare to do a 45deg clockwise turn in the cars direction.
     	Coordinate newDir = toCoordinate(ctrl.getOrientation());
     	Coordinate newCoord = addCoords(newDir, new Coordinate(ctrl.getPosition()));
     	float newAngle = toPrincipalAngle(toAngle(ctrl.getOrientation()) - 45);
     	ret.add(new Move(newCoord, ctrl.getOrientation(), newAngle, false));
     	
-    	// MOVE 2: --
-    	// TODO: This may not be needed, depending on the cars speed, and can be implied.
+    	// MOVE 2: Now do another 45 clockwise turn, and keep driving until we're two tiles
+    	// away from hitting a wall.
     	newDir = toCoordinate(getClockwiseDirection(ctrl.getOrientation()));
     	newAngle = toPrincipalAngle(newAngle - 45);
     	
@@ -91,12 +96,12 @@ public class ManoeuvreFactory {
         	ret.add(new Move(newCoord, getClockwiseDirection(ctrl.getOrientation()), newAngle, false));
     	}
     	
-    	// MOVE 3: \
+    	// MOVE 3: When 2 tiles away from hitting wall, prepare another 45deg turn to avoid crash.
     	newCoord = addCoords(newCoord, newDir);
     	newAngle = toPrincipalAngle(newAngle - 45);
     	ret.add(new Move(newCoord, getClockwiseDirection(ctrl.getOrientation()), newAngle, false));
     	
-    	// HEAD TO DESTINATION
+    	// MOVE 4: Now do 45deg turn again so we exit the deadend
     	newCoord = addCoords(newCoord, toCoordinate(getOppositeDir(ctrl.getOrientation())));
     	newAngle = toPrincipalAngle(newAngle - 45);
     	ret.add(new Move(newCoord, getOppositeDir(ctrl.getOrientation()), newAngle, false));
@@ -107,7 +112,7 @@ public class ManoeuvreFactory {
     public static List<Move> reverseTurn(MyAIController ctrl) {
     	List<Move> ret = new ArrayList<Move>();
         
-        // TODO: Should we add a check if the opposite orientation makes sense with our new dest?
+        // MOVE 1: Simply reverse in the opposite direction of car by one tile
     	Direction newOrient = getOppositeDir(ctrl.getOrientation());
     	Coordinate dest = addCoords(new Coordinate(ctrl.getPosition()), toCoordinate(newOrient));
     	
@@ -122,6 +127,7 @@ public class ManoeuvreFactory {
     	Coordinate currentPos = new Coordinate(ctrl.getPosition());
     	
     	for (Coordinate c : path.getTilesInPath()) {
+    		// calculate angle between currentPos and next destination
     		float angle = (float)Math.toDegrees(Math.atan2(c.y - currentPos.y, c.x - currentPos.x));
     		angle = toPrincipalAngle(angle);
     		Direction orientation;
@@ -156,6 +162,9 @@ public class ManoeuvreFactory {
     	return ret;
     }
     
+    /**
+     * Returns angle between 0 and 360 degrees.
+     */
     private static float toPrincipalAngle(float angle) {
     	return (angle + 360) % 360;
     }
@@ -176,6 +185,8 @@ public class ManoeuvreFactory {
     	}
     }
     
+    /** Converts Direction enum to a unit coordinate representing it.
+     */
     private static Coordinate toCoordinate(WorldSpatial.Direction direction) {
     	if (direction == Direction.NORTH) {
     		return new Coordinate(0, 1);
