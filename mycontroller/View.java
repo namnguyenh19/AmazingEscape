@@ -614,7 +614,7 @@ public class View {
      * Three Point: checks for the following min space:   |space||car|
      */
 
-    private void checkSpace(){
+    public void checkSpace(){
         int spaceLeft = 0;
         int spaceRight = 0;
 
