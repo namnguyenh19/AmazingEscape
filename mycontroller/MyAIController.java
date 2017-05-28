@@ -52,6 +52,9 @@ public class MyAIController extends CarController{
 	private int EAST_THRESHOLD = 3;
 
 	private List<Coordinate> visited;
+	/** The previous tile the car was on. */
+	private Coordinate prevLocation;
+	/** The tile we want to move to. */
 	private Coordinate currentDest;
 
 	public MyAIController(Car car) {
@@ -60,8 +63,7 @@ public class MyAIController extends CarController{
 		actions = new LinkedList<Move>();
 		visited = new ArrayList<Coordinate>();
 		currentDest = new Coordinate(car.getPosition());
-		
-		visited.add(currentDest);
+		prevLocation = currentDest;
 	}
 
 
@@ -71,6 +73,11 @@ public class MyAIController extends CarController{
 		// Retrieve local surrounding of car, to be fed into View class to interpret it
 		View currentView = new View(getView(), this.getOrientation());
 		checkStateChange();
+		
+		if (!prevLocation.equals(new Coordinate(this.getPosition()))) {
+			visited.add(prevLocation);
+			prevLocation = new Coordinate(this.getPosition());
+		}
 		
 		if (actions.size() > 0) {
 			this.applyMove(delta);
@@ -157,7 +164,7 @@ public class MyAIController extends CarController{
 		
 		// if current Move has been done due to reaching dest
 		if (move.dest.equals(new Coordinate(this.getPosition()))) {
-			visited.add(actions.poll().dest);
+			actions.poll();
 			move = actions.peek();
 		}
 		
