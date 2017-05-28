@@ -15,6 +15,7 @@ public class Path {
     private HashMap<Coordinate, MapTile> view;
     private HashMap<Coordinate, String> tileName;
     private ArrayList<Coordinate> tiles;
+    private WorldSpatial.Direction orientation;
     private boolean hasTrap;
 
     public static final int ROAD_COST = 1;
@@ -23,9 +24,10 @@ public class Path {
     public static final int MUD_COST = 50;
     public static final int EXIT_COST = -50;
 
-    public Path(HashMap<Coordinate, MapTile> view, ArrayList<Coordinate> tiles){
+    public Path(HashMap<Coordinate, MapTile> view, ArrayList<Coordinate> tiles, WorldSpatial.Direction orient){
         this.view = view;
         this.tiles = tiles;
+        this.orientation = orient;
         translateTileName();
     }
 

@@ -192,7 +192,7 @@ public class View {
                 tiles.add(coor);
             }
 
-            paths.add(new Path(this.curView, tiles));
+            paths.add(new Path(this.curView, tiles, curDir));
 
             return paths;
         }
@@ -225,7 +225,7 @@ public class View {
                     leftTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, leftTiles);
+                Path newPath = new Path(this.curView, leftTiles, curDir);
                 paths.add(newPath);
             }
 
@@ -248,7 +248,7 @@ public class View {
                     rightTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, rightTiles);
+                Path newPath = new Path(this.curView, rightTiles, this.curDir);
                 paths.add(newPath);
             }
 
@@ -291,7 +291,7 @@ public class View {
                 tiles.add(coor);
             }
 
-            paths.add(new Path(this.curView, tiles));
+            paths.add(new Path(this.curView, tiles, curDir));
 
             return paths;
         }
@@ -324,7 +324,7 @@ public class View {
                     leftTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, leftTiles);
+                Path newPath = new Path(this.curView, leftTiles, curDir);
                 paths.add(newPath);
             }
 
@@ -347,7 +347,7 @@ public class View {
                     rightTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, rightTiles);
+                Path newPath = new Path(this.curView, rightTiles, this.curDir);
                 paths.add(newPath);
             }
 
@@ -390,7 +390,7 @@ public class View {
                 tiles.add(coor);
             }
 
-            paths.add(new Path(this.curView, tiles));
+            paths.add(new Path(this.curView, tiles, this.curDir));
 
             return paths;
         }
@@ -423,7 +423,7 @@ public class View {
                     leftTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, leftTiles);
+                Path newPath = new Path(this.curView, leftTiles, curDir);
                 paths.add(newPath);
             }
 
@@ -446,7 +446,7 @@ public class View {
                     rightTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, rightTiles);
+                Path newPath = new Path(this.curView, rightTiles, this.curDir);
                 paths.add(newPath);
             }
 
@@ -489,7 +489,7 @@ public class View {
                 tiles.add(coor);
             }
 
-            paths.add(new Path(this.curView, tiles));
+            paths.add(new Path(this.curView, tiles, this.curDir));
 
             return paths;
         }
@@ -522,7 +522,7 @@ public class View {
                     leftTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, leftTiles);
+                Path newPath = new Path(this.curView, leftTiles, this.curDir);
                 paths.add(newPath);
             }
 
@@ -545,7 +545,7 @@ public class View {
                     rightTiles.add(coor);
                 }
 
-                Path newPath = new Path(this.curView, rightTiles);
+                Path newPath = new Path(this.curView, rightTiles, this.curDir);
                 paths.add(newPath);
             }
 
@@ -571,7 +571,6 @@ public class View {
                 else {
                     return false;
                 }
-                break;
             case WEST:
                 next = new Coordinate(coor.x-1, coor.y);
                 tile = this.curView.get(next);
@@ -581,7 +580,7 @@ public class View {
                 else {
                     return false;
                 }
-                break;
+
             case SOUTH:
                 next = new Coordinate(coor.x, coor.y-1);
                 tile = this.curView.get(next);
@@ -591,7 +590,7 @@ public class View {
                 else {
                     return false;
                 }
-                break;
+
             case NORTH:
                 next = new Coordinate(coor.x, coor.y+1);
                 tile = this.curView.get(next);
@@ -601,7 +600,7 @@ public class View {
                 else {
                     return false;
                 }
-                break;
+
         }
 
         return false;
