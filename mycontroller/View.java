@@ -16,6 +16,7 @@ public class View {
     private Coordinate curPos;
     private boolean canUTurn;
     private boolean canThreePoint;
+    private boolean turnLeft;
 
     // distance to each direction the car can see
     public static final int VIEW_SQUARE = 3;
@@ -114,7 +115,34 @@ public class View {
     }
 
     /**
-     * Method below checks for upcoming dead end given respective orientation of the car
+     * Methods below check for the space available in front of the car to do U Turn or ThreePoint Turn
+     * given the current orientation of the car
+     *
+     * U Turn: checks for the following minimum space:    |space||space|car|
+     * Three Point: checks for the following min space:   |space||car|
+     */
+
+    private int checkSpace(){
+
+    }
+
+    /**
+     * Check how much space to a side of the car
+     * @param isLeft whether we're checking the left or right side of the car
+     * @param orient whether car is facing EAST/WEST or NORTH/EAST
+     * @return number of empty tile(s)
+     */
+    private int sideSpace(int isLeft, int orient){
+        int count = 0;
+        for(int i = 1; i <= VIEW_SQUARE; i++){
+            Coordinate coor =
+        }
+
+        return count;
+    }
+
+    /**
+     * Methods below checks for upcoming dead end given respective orientation of the car
      * It checks if there is wall ahead, if so check responding walls on two sides
      */
 
@@ -123,9 +151,24 @@ public class View {
             Coordinate coor = new Coordinate(this.curPos.x + i, this.curPos.y);
             MapTile tile = this.curView.get(coor);
             if(tile.getName().equals("Wall")){
-                MapTile leftTile = this.curView.get(new Coordinate(coor.x-1, coor.y+1));
-                MapTile rightTile = this.curView.get(new Coordinate(coor.x-1, coor.y -1));
-                checkTwoSide(leftTile, rightTile);
+                Coordinate leftMost = coor;
+                Coordinate rightMost = coor;
+
+                //get how wide the wall in front is
+                for(int j = 1; j < VIEW_SQUARE; j++){
+                    MapTile leftTile = this.curView.get(new Coordinate(coor.x, coor.y+j));
+                    MapTile rightTile = this.curView.get(new Coordinate(coor.x, coor.y -j));
+
+                    if(checkWall(leftTile)){
+                        leftMost = new Coordinate(coor.x, coor.y+j);
+                    }
+                    if(checkWall(rightTile)){
+                        rightMost = new Coordinate(coor.x, coor.y -j);
+                    }
+                }
+                MapTile leftSide = this.curView.get(new Coordinate(leftMost.x-1, leftMost.y+1));
+                MapTile rightSide = this.curView.get(new Coordinate(rightMost.x-1, rightMost.y -1));
+                return checkTwoSide(leftSide, rightSide);
             }
         }
         return false;
@@ -136,9 +179,26 @@ public class View {
             Coordinate coor = new Coordinate(this.curPos.x - i, this.curPos.y);
             MapTile tile = this.curView.get(coor);
             if(tile.getName().equals("Wall")){
-                MapTile leftTile = this.curView.get(new Coordinate(coor.x+1, coor.y-1));
-                MapTile rightTile = this.curView.get(new Coordinate(coor.x+1, coor.y+1));
-                checkTwoSide(leftTile, rightTile);
+                Coordinate leftMost = coor;
+                Coordinate rightMost = coor;
+
+                //get how wide the wall in front is
+                for(int j = 1; j < VIEW_SQUARE; j++){
+                    MapTile leftTile = this.curView.get(new Coordinate(coor.x, coor.y-j));
+                    MapTile rightTile = this.curView.get(new Coordinate(coor.x, coor.y+j));
+
+                    if(checkWall(leftTile)){
+                        leftMost = new Coordinate(coor.x, coor.y-j);
+                    }
+                    if(checkWall(rightTile)){
+                        rightMost = new Coordinate(coor.x, coor.y+j);
+                    }
+                }
+                //get the diagonal tiles
+                MapTile leftSide = this.curView.get(new Coordinate(leftMost.x+1, leftMost.y-1));
+                MapTile rightSide = this.curView.get(new Coordinate(rightMost.x+1, rightMost.y+1));
+
+                return checkTwoSide(leftSide, rightSide);
             }
         }
         return false;
@@ -149,9 +209,26 @@ public class View {
             Coordinate coor = new Coordinate(this.curPos.x, this.curPos.y+i);
             MapTile tile = this.curView.get(coor);
             if(tile.getName().equals("Wall")){
-                MapTile leftTile = this.curView.get(new Coordinate(coor.x-1, coor.y-1));
-                MapTile rightTile = this.curView.get(new Coordinate(coor.x+1, coor.y-1));
-                checkTwoSide(leftTile, rightTile);
+                Coordinate leftMost = coor;
+                Coordinate rightMost = coor;
+
+                //get how wide the wall in front is
+                for(int j = 1; j < VIEW_SQUARE; j++){
+                    MapTile leftTile = this.curView.get(new Coordinate(coor.x-j, coor.y));
+                    MapTile rightTile = this.curView.get(new Coordinate(coor.x+j, coor.y));
+
+                    if(checkWall(leftTile)){
+                        leftMost = new Coordinate(coor.x-j, coor.y);
+                    }
+                    if(checkWall(rightTile)){
+                        rightMost = new Coordinate(coor.x+j, coor.y);
+                    }
+                }
+                //get the diagonal tiles
+                MapTile leftSide = this.curView.get(new Coordinate(leftMost.x-1, leftMost.y-1));
+                MapTile rightSide = this.curView.get(new Coordinate(rightMost.x+1, rightMost.y-1));
+
+                return checkTwoSide(leftSide, rightSide);
             }
         }
         return false;
@@ -162,16 +239,42 @@ public class View {
             Coordinate coor = new Coordinate(this.curPos.x, this.curPos.y-i);
             MapTile tile = this.curView.get(coor);
             if(tile.getName().equals("Wall")){
-                MapTile leftTile = this.curView.get(new Coordinate(coor.x+1, coor.y+1));
-                MapTile rightTile = this.curView.get(new Coordinate(coor.x-1, coor.y+1));
-                checkTwoSide(leftTile, rightTile);
+                Coordinate leftMost = coor;
+                Coordinate rightMost = coor;
+
+                //get how wide the wall in front is
+                for(int j = 1; j < VIEW_SQUARE; j++){
+                    MapTile leftTile = this.curView.get(new Coordinate(coor.x+j, coor.y));
+                    MapTile rightTile = this.curView.get(new Coordinate(coor.x-j, coor.y));
+
+                    if(checkWall(leftTile)){
+                        leftMost = new Coordinate(coor.x+j, coor.y);
+                    }
+                    if(checkWall(rightTile)){
+                        rightMost = new Coordinate(coor.x-j, coor.y);
+                    }
+                }
+                //get the diagonal tiles
+                MapTile leftSide = this.curView.get(new Coordinate(leftMost.x+1, leftMost.y+1));
+                MapTile rightSide = this.curView.get(new Coordinate(rightMost.x-1, rightMost.y+1));
+
+                return checkTwoSide(leftSide, rightSide);
             }
         }
         return false;
     }
 
     private boolean checkTwoSide(MapTile l, MapTile r){
-        if(l.getName().equals("Wall") && r.getName().equals("Wall")){
+        if(checkWall(l) && checkWall(r)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean checkWall(MapTile t){
+        if(t.getName().equals("Wall")){
             return true;
         }
         else {
