@@ -127,11 +127,17 @@ public class View {
 
 
     public ArrayList<Path> getPaths() {
-        return null;
+        if (checkDeadEnd()){
+            return null;
+        }
+
+        if (checkCornerAhead()){
+
+        }
     }
 
     /**
-     * Methods below check for the space available in front of the car to do U Turn or ThreePoint Turn
+     * Method below check for the space available in front of the car to do U Turn or ThreePoint Turn
      * given the current orientation of the car
      *
      * U Turn: checks for the following minimum space:    |space||space|car|

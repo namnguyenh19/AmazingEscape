@@ -17,12 +17,33 @@ public class Path {
     private List<Coordinate> tiles;
     private boolean hasTrap;
 
-    public static final int GRASS_COST = 2;
+    public static final int ROAD_COST = 1;
+    public static final int GRASS_COST = 10;
     public static final int LAVA_COST = 100;
-    public static final int MUD_COST = 10;
+    public static final int MUD_COST = 50;
 
     public double calculatePathCost(){
-        return 0;
+        double totalCost = 0;
+
+        for (Coordinate c : tiles){
+            MapTile curTile = view.get(c);
+
+            switch (curTile.getName()){
+                case "Lava":
+                    totalCost += LAVA_COST;
+                    break;
+                case "Grass":
+                    totalCost += GRASS_COST;
+                    break;
+                case "Mud":
+                    totalCost += MUD_COST;
+                    break;
+                default:
+                    totalCost += ROAD_COST;
+            }
+        }
+
+        return totalCost;
     }
 
     public void validatePath(){
