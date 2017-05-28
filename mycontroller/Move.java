@@ -4,7 +4,9 @@ import utilities.Coordinate;
 import world.WorldSpatial;
 
 /**
- * Created by NamNguyen1 on 27/5/17.
+ * Atomic class representing a move order.
+ * 
+ * Created by Project Group 37.
  */
 public class Move {
     Coordinate dest;

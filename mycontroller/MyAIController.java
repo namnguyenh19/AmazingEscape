@@ -31,6 +31,9 @@ public class MyAIController extends CarController{
 	 * our current Move order until we reach currentDest, which then we can remove it from queue.
 	 * 
 	 * 
+	 * 2. In the sequence diagram, we have forgotten to mention how the 'visited' attribute is
+	 * updated; this is now included in our update(..) method.
+	 * 
 	 * 
 	 */
 	
@@ -92,11 +95,10 @@ public class MyAIController extends CarController{
 		}
 		// Once the car is already stuck to a wall, apply the following logic
 		else {
-			boolean cornerAhead = currentView.checkCornerAhead();
 			boolean nearDeadEnd = currentView.checkDeadEnd();
 			List<Move> newMoves = null;
 			
-			if (nearDeadEnd && cornerAhead) {
+			if (nearDeadEnd) {
 				// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
 				// TODO: make checkSpace() public
 				currentView.checkSpace();
