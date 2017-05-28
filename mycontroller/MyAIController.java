@@ -169,7 +169,7 @@ public class MyAIController extends CarController{
 		Move move = actions.peek();
 		
 		// if current Move has been done due to reaching dest
-		if (move.dest.equals(new Coordinate(this.getPosition()))) {
+		if (move.dest != null && move.dest.equals(new Coordinate(this.getPosition()))) {
 			actions.poll();
 			move = actions.peek();
 		}
