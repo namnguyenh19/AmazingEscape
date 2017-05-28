@@ -177,7 +177,7 @@ public class ManoeuvreFactory {
     /**
      * Retrieve the principal angle between two points.
      */
-    private static float getAngleTwoPts(Coordinate start, Coordinate end) {
+    public static float getAngleTwoPts(Coordinate start, Coordinate end) {
     	float angle = (float)Math.toDegrees(Math.atan2(end.y - start.y, end.x - start.x));
 		return toPrincipalAngle(angle); 
     }
@@ -245,6 +245,25 @@ public class ManoeuvreFactory {
     		return WorldSpatial.SOUTH_DEGREE;
     	} else {
     		return WorldSpatial.WEST_DEGREE;
+    	}
+    }
+    
+    /** Converts angle to a Direction enum; if the angle none
+     * of the enum values then null is returned.
+     */
+    public static Direction toDirection(int angle) {
+    	angle = (int)toPrincipalAngle(angle);
+    	
+    	if (angle == WorldSpatial.NORTH_DEGREE) {
+    		return Direction.NORTH;
+    	} else if (angle == WorldSpatial.EAST_DEGREE_MIN) {
+    		return Direction.EAST;
+    	} else if (angle == WorldSpatial.WEST_DEGREE) {
+    		return Direction.WEST;
+    	} else if (angle == WorldSpatial.SOUTH_DEGREE) {
+    		return Direction.SOUTH;
+    	} else {
+    		return null;
     	}
     }
 }
