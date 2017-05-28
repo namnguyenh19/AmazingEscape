@@ -16,8 +16,8 @@ public class GrassHandler extends TrapHandler{
 
     private WorldSpatial.RelativeDirection[] POSSIBLEDIR = {WorldSpatial.RelativeDirection.LEFT, WorldSpatial.RelativeDirection.RIGHT};
 
-    public GrassHandler(Car car, String type, Coordinate dest, boolean blocked, HashMap<Coordinate, MapTile> view){
-        super(car, type,dest,blocked,view);
+    public GrassHandler(boolean blocked, HashMap<Coordinate, MapTile> view){
+        super(blocked,view);
     }
 
     public boolean handleTrap(Path path){
@@ -45,6 +45,10 @@ public class GrassHandler extends TrapHandler{
         	}
         	
         	prevDir = nextDir;
+        }
+        
+        if (pathBlocked){
+            return false;
         }
         
         return true;

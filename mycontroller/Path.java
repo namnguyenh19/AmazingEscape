@@ -17,7 +17,6 @@ public class Path {
     private HashMap<Coordinate, String> tileName;
     private ArrayList<Coordinate> tiles;
     private WorldSpatial.Direction orientation;
-    private boolean hasTrap;
 
     public static final int ROAD_COST = 1;
     public static final int GRASS_COST = 10;
@@ -66,8 +65,25 @@ public class Path {
         return totalCost;
     }
 
-    public void validatePath(){
+    public boolean validatePath(){
+        boolean isValid = true;
 
+        if (tileName.containsValue("Lava")){
+            LavaHandler handler = new LavaHandler(false, view);
+            isValid = handler.handleTrap(this);
+        }
+
+        if (tileName.containsValue("Mud")){
+            MudHandler handler = new MudHandler(false, view);
+            isValid = handler.handleTrap(this);
+        }
+
+        if (tileName.containsValue("Grass")){
+            GrassHandler handler = new GrassHandler(false, view);
+            isValid = handler.handleTrap(this);
+        }
+
+        return isValid;
     }
 
     public HashMap<Coordinate, String> getTileName(){

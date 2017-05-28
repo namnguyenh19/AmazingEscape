@@ -10,11 +10,10 @@ import java.util.HashMap;
  * Created by NamNguyen1 on 27/5/17.
  */
 public class MudHandler extends TrapHandler {
-    public static final float SPEED_REDUCE = 0.6f;
-    private int numMuds;
 
-    public MudHandler(Car car, String type, Coordinate dest, boolean blocked, HashMap<Coordinate, MapTile> view){
-        super(car,type,dest,blocked,view);
+
+    public MudHandler(boolean blocked, HashMap<Coordinate, MapTile> view){
+        super(blocked,view);
     }
 
     public boolean handleTrap(Path path) {
@@ -28,7 +27,4 @@ public class MudHandler extends TrapHandler {
         return true;
     }
 
-    private float predictSpeed(){
-        return 0;
-    }
 }
