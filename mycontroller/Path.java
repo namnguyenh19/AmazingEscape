@@ -5,9 +5,8 @@ import utilities.Coordinate;
 import world.World;
 import world.WorldSpatial;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by NamNguyen1 on 27/5/17.
@@ -15,7 +14,7 @@ import java.util.List;
 public class Path {
     private HashMap<Coordinate, MapTile> view;
     private HashMap<Coordinate, String> tileName;
-    private List<Coordinate> tiles;
+    private ArrayList<Coordinate> tiles;
     private boolean hasTrap;
 
     public static final int ROAD_COST = 1;
@@ -24,7 +23,7 @@ public class Path {
     public static final int MUD_COST = 50;
     public static final int EXIT_COST = -50;
 
-    public Path(HashMap<Coordinate, MapTile> view, List<Coordinate> tiles){
+    public Path(HashMap<Coordinate, MapTile> view, ArrayList<Coordinate> tiles){
         this.view = view;
         this.tiles = tiles;
         translateTileName();
@@ -95,7 +94,7 @@ public class Path {
         }
     }
     
-    public List<Coordinate> getTilesInPath() {
-    	return Collections.unmodifiableList(tiles);
+    public ArrayList<Coordinate> getTilesInPath() {
+    	return tiles;
     }
 }

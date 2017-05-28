@@ -5,6 +5,7 @@ import utilities.Coordinate;
 import world.WorldSpatial;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -145,8 +146,45 @@ public class View {
         if (checkCornerAhead()){
             //TODO path logic for following corner;
         }
+        else {
+            //car is going straight
+            int leftWalldistance = 0;
+            int rightWalldistance = 0;
+            //check where wall is on each side
 
+            //check left side of car first
+            for(int i = 1; i <= VIEW_SQUARE; i++){
+                Coordinate left = new Coordinate(curPos.x, curPos.y+i);
 
+                MapTile tile = curView.get(left);
+                if (tile.getName().equals("Wall")){
+                    leftWalldistance = i;
+                    break;
+                }
+
+            }
+
+            //adding paths to the left
+            for (int i = 1; i < leftWalldistance; i++){
+                List<Coordinate> tiles;
+                for(int j = 1; j <= VIEW_SQUARE; j++){
+                    Coordinate coor = new Coordinate(curPos.x + j, curPos.y + i);
+                    tiles.add(coor);
+                }
+            }
+
+            //check right side of car
+            for(int i = 1; i <= VIEW_SQUARE; i++){
+                Coordinate right = new Coordinate(curPos.x, curPos.y+i);
+
+                MapTile tile = curView.get(right);
+                if (tile.getName().equals("Wall")){
+                    rightWalldistance = i;
+                    break;
+                }
+
+            }
+        }
     }
 
 
