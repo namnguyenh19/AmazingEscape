@@ -91,13 +91,16 @@ public class MyAIController extends CarController{
 			// Turn to a direction so that when we hit a wall, we can turn
 			// to left of the wall
 			actions.addAll(ManoeuvreFactory.followWall(this));
+			
 		}
 		// Once the car is already stuck to a wall, apply the following logic
 		else {
+						
 			boolean nearDeadEnd = currentView.checkDeadEnd();
 			List<Move> newMoves = null;
 			
 			if (nearDeadEnd) {
+								
 				// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
 				// TODO: make checkSpace() public
 				currentView.checkSpace();
@@ -115,7 +118,9 @@ public class MyAIController extends CarController{
 			} else {
 				
 				Path bestPath = this.findBestPath(currentView.getPaths());
+				
 				newMoves = ManoeuvreFactory.followPath(this, bestPath);
+				
 				actions.addAll(newMoves);
 			}
 			

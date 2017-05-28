@@ -21,4 +21,8 @@ public class Move {
         this.angle = angle;
         this.reverse = reverse;
     }
+    
+    public String toString(){
+    	return "Going toward " + this.orientation + " with angle of " + this.angle;
+    }
 }

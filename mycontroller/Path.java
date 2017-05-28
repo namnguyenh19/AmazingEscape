@@ -123,4 +123,8 @@ public class Path {
     public ArrayList<Coordinate> getTilesInPath() {
     	return tiles;
     }
+    
+    public String toString(){
+    	return tiles.toString();
+    }
 }
