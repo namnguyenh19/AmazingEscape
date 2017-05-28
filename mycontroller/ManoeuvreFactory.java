@@ -31,7 +31,7 @@ public class ManoeuvreFactory {
     	ret.add(new Move(newCoord, newOrient, newAngle, true));
     	
     	// HEAD TO DESTINATION
-    	newOrient = getOppositeOrientation(ctrl.getOrientation());
+    	newOrient = getOppositeDir(ctrl.getOrientation());
     	ret.add(new Move(dest, newOrient, toAngle(newOrient), false));
     	
     	
@@ -73,7 +73,7 @@ public class ManoeuvreFactory {
     	List<Move> ret = new ArrayList<Move>();
         
         // TODO: Should we add a check if the opposite orientation makes sense with our new dest?
-    	Direction newOrient = getOppositeOrientation(ctrl.getOrientation());
+    	Direction newOrient = getOppositeDir(ctrl.getOrientation());
     	
         ret.add(new Move(dest, newOrient, toAngle(newOrient), true));
         return ret;
@@ -110,6 +110,16 @@ public class ManoeuvreFactory {
         return ret;
     }
     
+    public static List<Move> followWall(MyAIController ctrl) {
+    	Direction antiDir = getAntiClockwiseDirection(ctrl.getOrientation());
+    	List<Move> ret = new ArrayList<Move>();
+    	
+    	// TODO: added null coordinate to indicate we are not going to a certain coordinate but 
+    	ret.add(new Move(null, antiDir, toAngle(antiDir), false));
+    	
+    	return ret;
+    }
+    
     private static float toPrincipalAngle(float angle) {
     	return (angle + 360) % 360;
     }
@@ -118,7 +128,7 @@ public class ManoeuvreFactory {
     	return new Coordinate(c1.x + c2.x, c1.y + c2.y);
     }
     
-    private static WorldSpatial.Direction getOppositeOrientation(WorldSpatial.Direction direction) {
+    private static WorldSpatial.Direction getOppositeDir(WorldSpatial.Direction direction) {
     	if (direction == Direction.NORTH) {
     		return Direction.SOUTH;
     	} else if (direction == Direction.SOUTH) {
@@ -151,6 +161,18 @@ public class ManoeuvreFactory {
     		return Direction.WEST;
     	} else {
     		return Direction.NORTH;
+    	}
+    }
+    
+    private static WorldSpatial.Direction getAntiClockwiseDirection(WorldSpatial.Direction direction) {
+    	if (direction == Direction.NORTH) {
+    		return Direction.WEST;
+    	} else if (direction == Direction.EAST) {
+    		return Direction.NORTH;
+    	} else if (direction == Direction.SOUTH) {
+    		return Direction.EAST;
+    	} else {
+    		return Direction.SOUTH;
     	}
     }
     

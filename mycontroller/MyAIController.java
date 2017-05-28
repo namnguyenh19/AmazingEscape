@@ -1,13 +1,13 @@
 package mycontroller;
 
 import controller.CarController;
-import tiles.MapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class MyAIController extends CarController{
@@ -30,44 +30,67 @@ public class MyAIController extends CarController{
 
 	public MyAIController(Car car) {
 		super(car);
+		
+		actions = new LinkedList<Move>();
 	}
 
 
 	@Override
 	public void update(float delta) {
-
-		//TODO replace with View and Path logic
-		// Gets what the car can see
+		// TODO: replace with View and Path logic
+		// Retrieve local surrounding of car, to be fed into View class to interpret it
 		View currentView = new View(getView(), this.getOrientation());
-
-
-
 		checkStateChange();
-
+		
+		if (actions.size() > 0) {
+			this.applyMove(actions.poll());
+			return;
+		}
 
 		// If you are not following a wall initially, find a wall to stick to!
-		if(!isFollowingWall){
-			if(getVelocity() < CAR_SPEED){
+		if(!currentView.checkFollowingWall()) {
+			if (getVelocity() < CAR_SPEED) {
 				applyForwardAcceleration();
 			}
-			// Turn towards the north
-			if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
-				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
-				applyLeftTurn(getOrientation(),delta);
-			}
-			if(currentView.checkSouth(currentView.getCurPos())){
-				// Turn right until we go back to east!
-				if(!getOrientation().equals(WorldSpatial.Direction.EAST)){
-					lastTurnDirection = WorldSpatial.RelativeDirection.RIGHT;
-					applyRightTurn(getOrientation(),delta);
-				}
-				else{
-					isFollowingWall = true;
-				}
-			}
+			
+			// Turn to a direction so that when we hit a wall, we can turn
+			// to left of the wall
+			actions.addAll(ManoeuvreFactory.followWall(this));
 		}
 		// Once the car is already stuck to a wall, apply the following logic
-		else{
+		else {
+			// TODO: ??
+			if (getVelocity() < CAR_SPEED) {
+				applyForwardAcceleration();
+			}
+			
+			boolean cornerAhead = currentView.checkCornerAhead();
+			boolean nearDeadEnd = currentView.checkDeadEnd();
+			List<Move> newMoves = null;
+			
+			if (nearDeadEnd && cornerAhead) {
+				// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
+				// TODO: make checkSpace() public
+				currentView.checkSpace();
+				
+				// TODO: do we need to find the dest variable?
+				if (currentView.isCanUTurn()) {
+					newMoves = ManoeuvreFactory.uTurn(this, dest);
+				} else if (currentView.isCanThreePoint()) {
+					newMoves = ManoeuvreFactory.threePointTurn(this, dest);
+				} else {
+					newMoves = ManoeuvreFactory.reverseTurn(this, dest);
+				}
+				
+				actions.addAll(newMoves);
+			} else {
+				
+				Path bestPath = this.findBestPath(currentView.getPaths());
+				newMoves = ManoeuvreFactory.followPath(this, bestPath);
+				actions.addAll(newMoves);
+			}
+			
+			/**
 
 			// Readjust the car if it is misaligned.
 			readjust(lastTurnDirection,delta);
@@ -103,7 +126,18 @@ public class MyAIController extends CarController{
 				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
 				isTurningLeft = true;
 			}
+			
+			**/
 		}
+	}
+	
+	private void applyMove(Move move) {
+		// TODO: This is a stub method
+	}
+	
+	private Path findBestPath(List<Path> paths) {
+		// TODO: This is a stub method
+		return null;
 	}
 
 	/**
