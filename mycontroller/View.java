@@ -126,15 +126,29 @@ public class View {
     }
 
 
+    /**
+     * Method traverses through the car's view and get all available paths
+     */
     public ArrayList<Path> getPaths() {
         if (checkDeadEnd()){
             return null;
         }
 
-        if (checkCornerAhead()){
 
-        }
     }
+
+    /**
+     * Methods below get available paths according to the car's current orientation
+     */
+
+    private ArrayList<Path> getPathsEast(){
+        if (checkCornerAhead()){
+            //TODO path logic for following corner;
+        }
+
+
+    }
+
 
     /**
      * Method below check for the space available in front of the car to do U Turn or ThreePoint Turn
@@ -234,6 +248,7 @@ public class View {
                     MapTile leftTile = this.curView.get(new Coordinate(coor.x, coor.y+j));
                     MapTile rightTile = this.curView.get(new Coordinate(coor.x, coor.y-j));
 
+                    // can only be a dead end if tiles to both side of detected Wall are also Walls
                     if (checkTwoSide(leftTile, rightTile)){
                         //check the tile directly below leftTile and rightTile, they must not be a wall
                         MapTile leftBelow = this.curView.get(new Coordinate(coor.x-1, coor.y+j));
