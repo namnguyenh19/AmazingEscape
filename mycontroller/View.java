@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Created by NamNguyen1 on 27/5/17.
+ * Class provided containing methods to interpret a local view
+ * of a car.
+ * 
+ * Created by Project Group 37.
  */
 public class View {
     private HashMap<Coordinate, MapTile> curView;

@@ -2,7 +2,6 @@ package mycontroller;
 
 import tiles.MapTile;
 import utilities.Coordinate;
-import world.World;
 import world.WorldSpatial;
 import world.WorldSpatial.Direction;
 
@@ -10,7 +9,9 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 /**
- * Created by NamNguyen1 on 27/5/17.
+ * Represents a contiguous sequence of tiles that a car can follow.
+ * 
+ * Created by Project Group 37.
  */
 public class Path {
     private HashMap<Coordinate, MapTile> view;

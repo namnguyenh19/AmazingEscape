@@ -2,12 +2,13 @@ package mycontroller;
 
 import tiles.MapTile;
 import utilities.Coordinate;
-import world.Car;
 
 import java.util.HashMap;
 
 /**
- * Created by NamNguyen1 on 27/5/17.
+ * TrapHandler for mud trap.
+ * 
+ * Created by Project Group 37.
  */
 public class MudHandler extends TrapHandler {
 

@@ -12,8 +12,9 @@ import java.util.List;
 import java.util.Queue;
 
 /**
- *
  * Our AI auto-controller.
+ *
+ * Created by Project Group 37.
  *
  */
 public class MyAIController extends CarController{
@@ -37,11 +38,8 @@ public class MyAIController extends CarController{
 	 * 
 	 */
 	
-	
 	Queue<Move> actions;
 
-	private boolean isFollowingWall = false; // This is initialized when the car sticks to a wall.
-	private WorldSpatial.RelativeDirection lastTurnDirection = null; // Shows the last turn direction the car takes.
 	private boolean isTurningLeft = false;
 	private boolean isTurningRight = false;
 	private WorldSpatial.Direction previousState = null; // Keeps track of the previous state

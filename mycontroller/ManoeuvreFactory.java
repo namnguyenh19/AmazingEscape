@@ -11,7 +11,7 @@ import world.WorldSpatial.Direction;
  * Factory class for creating a list of atomic moves, representing movements
  * such as a three-point turn.
  * 
- * Created by NamNguyen1 on 27/5/17.
+ * Created by Project Group 37.
  */
 public class ManoeuvreFactory {
 	/*

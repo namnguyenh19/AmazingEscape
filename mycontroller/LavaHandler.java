@@ -1,13 +1,14 @@
 package mycontroller;
 
 import tiles.MapTile;
-import world.*;
 import utilities.Coordinate;
 
 import java.util.HashMap;
 
 /**
- * Created by NamNguyen1 on 27/5/17.
+ * TrapHandler for the lava trap.
+ * 
+ * Created by Project Group 37.
  */
 public class LavaHandler extends TrapHandler{
 
