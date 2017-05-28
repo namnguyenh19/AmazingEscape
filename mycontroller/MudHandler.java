@@ -17,8 +17,15 @@ public class MudHandler extends TrapHandler {
         super(car,type,dest,blocked,view);
     }
 
-    public Path handleTrap(){
-        return null;
+    public boolean handleTrap(Path path) {
+        int count = 0;
+        for (Coordinate c : path.getTilesInPath()) {
+            if (path.getTileName().get(c).equals("Mud"))
+                count++;
+            if (count > 2)
+                return false;
+        }
+        return true;
     }
 
     private float predictSpeed(){

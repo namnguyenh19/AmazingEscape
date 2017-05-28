@@ -22,7 +22,15 @@ public class LavaHandler extends TrapHandler{
         return 0;
     }
 
-    public Path handleTrap(){
-        return null;
+    public boolean handleTrap(Path path){
+        int count = 0;
+        for (Coordinate c : path.getTilesInPath()) {
+            if (path.getTileName().get(c).equals("Lava")) {
+                count++;
+            }
+            if (count > 2)
+                return false;
+        }
+        return true;
     }
 }
