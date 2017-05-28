@@ -185,8 +185,9 @@ public class View {
         if(l.getName().equals("Wall") && r.getName().equals("Wall")){
             return true;
         }
-        
-        return false;
+        else {
+            return false;
+        }
     }
 
     /**

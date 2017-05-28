@@ -51,8 +51,8 @@ public class MyAIController extends CarController{
 				applyForwardAcceleration();
 			}
 			// Turn towards the north
-			if(!getOrientation().equals(WorldSpatial.Direction.SOUTH)){
-				lastTurnDirection = WorldSpatial.RelativeDirection.RIGHT;
+			if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
+				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
 				applyLeftTurn(getOrientation(),delta);
 			}
 			if(currentView.checkSouth(currentView.getCurPos())){
