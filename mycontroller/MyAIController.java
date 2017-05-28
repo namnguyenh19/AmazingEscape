@@ -188,8 +188,23 @@ public class MyAIController extends CarController{
 	}
 	
 	private Path findBestPath(List<Path> paths) {
-		// TODO: This is a stub method
-		return null;
+		double pathCosts[] = new double[paths.size()];
+
+		for(int i = 0; i < paths.size(); i++){
+			pathCosts[i] = paths.get(i).calculatePathCost();
+		}
+
+		int minIndex = 0;
+		double minVal = pathCosts[0];
+
+		for(int i = 0; i < pathCosts.length; i++){
+			if (pathCosts[i] < minVal){
+				minVal = pathCosts[i];
+				minIndex = i;
+			}
+		}
+
+		return paths.get(minIndex);
 	}
 	
 	public List<Coordinate> getVisitedTiles() {
