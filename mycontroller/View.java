@@ -5,9 +5,7 @@ import utilities.Coordinate;
 import world.WorldSpatial;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by NamNguyen1 on 27/5/17.
@@ -143,13 +141,21 @@ public class View {
      */
 
     private ArrayList<Path> getPathsEast(){
+        ArrayList<Path> paths = new ArrayList<>();
+
         if (checkCornerAhead()){
-            //TODO path logic for following corner;
+            Coordinate corner;
+
+
         }
         else {
             //car is going straight
             int leftWalldistance = 0;
             int rightWalldistance = 0;
+
+            ArrayList<Coordinate> leftTiles = new ArrayList<>();
+            ArrayList<Coordinate> rightTiles = new ArrayList<>();
+
             //check where wall is on each side
 
             //check left side of car first
@@ -166,11 +172,13 @@ public class View {
 
             //adding paths to the left
             for (int i = 1; i < leftWalldistance; i++){
-                List<Coordinate> tiles;
                 for(int j = 1; j <= VIEW_SQUARE; j++){
                     Coordinate coor = new Coordinate(curPos.x + j, curPos.y + i);
-                    tiles.add(coor);
+                    leftTiles.add(coor);
                 }
+
+                Path newPath = new Path(this.curView, leftTiles);
+                paths.add(newPath);
             }
 
             //check right side of car
@@ -184,6 +192,19 @@ public class View {
                 }
 
             }
+
+            //adding paths to the right
+            for (int i = 1; i < rightWalldistance; i++){
+                for(int j = 1; j <= VIEW_SQUARE; j++){
+                    Coordinate coor = new Coordinate(curPos.x + j, curPos.y - i);
+                    rightTiles.add(coor);
+                }
+
+                Path newPath = new Path(this.curView, rightTiles);
+                paths.add(newPath);
+            }
+
+            return paths;
         }
     }
 
@@ -301,15 +322,16 @@ public class View {
                             rightSide = this.curView.get(new Coordinate(coor.x-1, coor.y-j-1));
                         }
 
+                        if (checkTwoSide(leftSide, rightSide)){
+                            return true;
+                        }
+
                         if (checkWall(leftBelow) && checkWall(rightBelow)){
                             break;
                         }
+
                     }
 
-                }
-
-                if (checkTwoSide(leftSide, rightSide)){
-                    return true;
                 }
             }
         }
@@ -344,15 +366,15 @@ public class View {
                             rightSide = this.curView.get(new Coordinate(coor.x+1, coor.y+j+1));
                         }
 
+                        if (checkTwoSide(leftSide, rightSide)){
+                            return true;
+                        }
+
                         if (checkWall(leftBelow) && checkWall(rightBelow)){
                             break;
                         }
                     }
 
-                }
-
-                if (checkTwoSide(leftSide, rightSide)){
-                    return true;
                 }
             }
         }
@@ -387,15 +409,15 @@ public class View {
                             rightSide = this.curView.get(new Coordinate(coor.x+j+1, coor.y-1));
                         }
 
+                        if (checkTwoSide(leftSide, rightSide)){
+                            return true;
+                        }
+
                         if (checkWall(leftBelow) && checkWall(rightBelow)){
                             break;
                         }
                     }
 
-                }
-
-                if (checkTwoSide(leftSide, rightSide)){
-                    return true;
                 }
             }
         }
@@ -430,15 +452,15 @@ public class View {
                             rightSide = this.curView.get(new Coordinate(coor.x-j-1, coor.y+1));
                         }
 
+                        if (checkTwoSide(leftSide, rightSide)){
+                            return true;
+                        }
+
                         if (checkWall(leftBelow) && checkWall(rightBelow)){
                             break;
                         }
                     }
 
-                }
-
-                if (checkTwoSide(leftSide, rightSide)){
-                    return true;
                 }
             }
         }
@@ -471,7 +493,7 @@ public class View {
     private boolean checkCornerEast(){
         for(int i = 0; i < VIEW_SQUARE; i++){
             Coordinate coor = new Coordinate(this.curPos.x + i, this.curPos.y);
-            // check North with specific coordinate of a Wall
+            // check East with specific coordinate of a Wall
             for(int j = 0; j < VIEW_SQUARE; j++){
                 MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y+j));
                 if(tile.getName().equals("Wall")){
@@ -489,7 +511,7 @@ public class View {
     private boolean checkCornerWest(){
         for(int i = 0; i < VIEW_SQUARE; i++){
             Coordinate coor = new Coordinate(this.curPos.x - i, this.curPos.y);
-            // check North with specific coordinate of a Wall
+            // check West with specific coordinate of a Wall
             for(int j = 0; j < VIEW_SQUARE; j++){
                 MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y-j));
                 if(tile.getName().equals("Wall")){
@@ -525,7 +547,7 @@ public class View {
     private boolean checkCornerSouth(){
         for(int i = 0; i < VIEW_SQUARE; i++){
             Coordinate coor = new Coordinate(this.curPos.x, this.curPos.y - i);
-            // check North with specific coordinate of a Wall
+            // check South with specific coordinate of a Wall
             for(int j = 0; j < VIEW_SQUARE; j++){
                 MapTile tile = this.curView.get(new Coordinate(coor.x+j, coor.y));
                 if(tile.getName().equals("Wall")){
