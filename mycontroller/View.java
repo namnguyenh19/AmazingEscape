@@ -335,8 +335,9 @@ public class View {
         if(t.getName().equals("Wall")){
             return true;
         }
-        
-        return false;
+        else {
+            return false;
+        }
     }
 
     /**
