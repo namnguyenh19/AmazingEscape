@@ -205,7 +205,7 @@ public class ManoeuvreFactory {
     
     /** Converts Direction enum to a unit coordinate representing it.
      */
-    private static Coordinate toCoordinate(WorldSpatial.Direction direction) {
+    public static Coordinate toCoordinate(WorldSpatial.Direction direction) {
     	if (direction == Direction.NORTH) {
     		return new Coordinate(0, 1);
     	} else if (direction == Direction.SOUTH) {
@@ -217,7 +217,7 @@ public class ManoeuvreFactory {
     	}
     }
     
-    private static WorldSpatial.Direction getClockwiseDirection(WorldSpatial.Direction direction) {
+    public static WorldSpatial.Direction getClockwiseDirection(WorldSpatial.Direction direction) {
     	if (direction == Direction.NORTH) {
     		return Direction.EAST;
     	} else if (direction == Direction.EAST) {
@@ -229,7 +229,7 @@ public class ManoeuvreFactory {
     	}
     }
     
-    private static WorldSpatial.Direction getAntiClockwiseDirection(WorldSpatial.Direction direction) {
+    public static WorldSpatial.Direction getAntiClockwiseDirection(WorldSpatial.Direction direction) {
     	if (direction == Direction.NORTH) {
     		return Direction.WEST;
     	} else if (direction == Direction.EAST) {

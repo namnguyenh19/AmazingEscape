@@ -41,6 +41,8 @@ public class View {
 
     // distance to each direction the car can see
     public static final int VIEW_SQUARE = 3;
+    // How many minimum units the wall is away from the player.
+ 	private int wallSensitivity = 2;
 
     public Coordinate getCurPos() {
         return curPos;
@@ -85,6 +87,22 @@ public class View {
                 return checkEast(curPos);
             case WEST:
                 return checkSouth(curPos);
+            default:
+                return false;
+        }
+
+    }
+    
+    private boolean checkFollowingWall(Coordinate pos) {
+        switch(this.curDir){
+            case EAST:
+                return checkNorth(pos);
+            case NORTH:
+                return checkWest(pos);
+            case SOUTH:
+                return checkEast(pos);
+            case WEST:
+                return checkSouth(pos);
             default:
                 return false;
         }
@@ -155,6 +173,65 @@ public class View {
         }
 
         return paths;
+    }
+    
+    
+    private ArrayList<Path> getPaths2() {
+    	ArrayList<Path> paths = new ArrayList<Path>();
+    	
+    	
+    	ArrayList<Coordinate> initCoords = new ArrayList<Coordinate>();
+    	initCoords.add(curPos);
+
+    	Path initPath = new Path(curView, initCoords, curDir);
+    	
+    	recursive(paths, initPath, curDir, curDir);
+    	
+    	return paths;
+    }
+    
+    private void recursive(ArrayList<Path> list, Path p, WorldSpatial.Direction prevOrient, WorldSpatial.Direction currOrient) {
+    	Coordinate currentPos = p.getTilesInPath().get(p.getTilesInPath().size() - 1);
+    	
+    	WorldSpatial.Direction possibleOrients[] = {ManoeuvreFactory.getAntiClockwiseDirection(currOrient),
+    								prevOrient, ManoeuvreFactory.getClockwiseDirection(currOrient)};
+    	
+    	int numNull = 0;
+    	for (WorldSpatial.Direction d : possibleOrients) {
+    		Coordinate coAdd = ManoeuvreFactory.toCoordinate(d);
+    		Coordinate newPos = new Coordinate(coAdd.x + currentPos.x, coAdd.y + currentPos.y);
+    		MapTile tile = this.curView.get(newPos);
+    		
+    		if (tile == null || d == ManoeuvreFactory.getAntiClockwiseDirection(prevOrient) ||
+    				d == ManoeuvreFactory.getAntiClockwiseDirection(ManoeuvreFactory.getAntiClockwiseDirection(prevOrient))) {
+    			numNull++;
+    			continue;
+    		}
+    		
+    		if (!tile.getName().equals("Wall")) {
+    	    	ArrayList<Coordinate> newCoords = new ArrayList<Coordinate>(p.getTilesInPath());
+    	    	newCoords.add(newPos);
+    	    	
+    	    	System.out.print("Path: ");
+    	    	for (Coordinate ck : newCoords) {
+    	    		System.out.print("(" + ck + "), ");
+    	    	}
+    	    	System.out.println();
+    	    	
+    	    	Path newPath = new Path(this.curView, newCoords, curDir);
+    	    	recursive(list, newPath, currOrient, d);
+    		} else {
+    			numNull++;
+    		}
+    	}
+    	
+    	if (numNull == possibleOrients.length) {
+    		if (p.getTilesInPath().size() > 0) {
+    			list.add(p);
+    		}
+    		
+    		return;
+    	}
     }
 
     /**
@@ -973,7 +1050,7 @@ public class View {
      */
     private boolean checkEast(Coordinate coor){
         // Check tiles to my right
-        for(int i = 0; i < VIEW_SQUARE; i++){
+        for(int i = 0; i <= wallSensitivity; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x+i, coor.y));
             if(tile.getName().equals("Wall")){
                 return true;
@@ -984,7 +1061,7 @@ public class View {
 
     private boolean checkWest(Coordinate coor){
         // Check tiles to my left
-        for(int i = 0; i < VIEW_SQUARE; i++){
+        for(int i = 0; i <= wallSensitivity; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x-i, coor.y));
             if(tile.getName().equals("Wall")){
                 return true;
@@ -995,7 +1072,7 @@ public class View {
 
     private boolean checkNorth(Coordinate coor){
         // Check tiles to towards the top
-        for(int i = 0; i < VIEW_SQUARE; i++){
+        for(int i = 0; i <= wallSensitivity; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y+i));
             if(tile.getName().equals("Wall")){
                 return true;
@@ -1006,7 +1083,7 @@ public class View {
 
     public boolean checkSouth(Coordinate coor){
         // Check tiles towards the bottom
-        for(int i = 0; i < VIEW_SQUARE; i++){
+        for(int i = 0; i <= wallSensitivity; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y-i));
             if(tile.getName().equals("Wall")){
                 return true;

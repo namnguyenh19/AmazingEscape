@@ -11,6 +11,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 
 import controller.CarController;
 import controller.ManualController;
+import mycontroller.MyAIController;
 import tiles.MapTile;
 import tiles.TrapTile;
 import tiles.UtilityTile;
@@ -65,7 +66,7 @@ public class World {
 		// Add the car controller
 //		 controller = new ManualController(car);
 //		controller = new AIController(car);
-		 controller = new ManualController(car);
+		 controller = new MyAIController(car);
 	}
 	
 	private void initializeMap(TiledMap map2) {

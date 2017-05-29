@@ -119,11 +119,13 @@ public class MyAIController extends CarController{
 				return;
 			}
 			
-			for(Path p : currentView.getPaths()){
+			List<Path> allPaths = currentView.getPaths();
+			for(Path p : allPaths){
 				System.out.println(p.toString());
 			}
+			System.out.println("Number of paths found: " + allPaths.size());
 			
-			Path bestPath = this.findBestPath(currentView.getPaths());
+			Path bestPath = this.findBestPath(allPaths);
 			
 			
 			System.out.println("Chosen path: " + bestPath.toString());
@@ -239,6 +241,10 @@ public class MyAIController extends CarController{
 	private void applyMove(float delta) {
 		Move move = actions.peek();
 		
+		if (move == null) {
+			return;
+		}
+		
 		// if current Move has been done due to reaching dest
 		if (move.dest != null && move.dest.equals(new Coordinate(this.getPosition()))) {
 			actions.poll();
@@ -252,43 +258,16 @@ public class MyAIController extends CarController{
 		System.out.println(move);
 		
 		if (Math.abs(this.getAngle() - move.angle) > ROTATE_EPSILON) {
-			// TODO: simple code, assumes the car is facing in the angle to do this
 			// TODO: need to test for reverse case
 			
-			if (this.getOrientation() == Direction.EAST) {
-				if (move.orientation == Direction.NORTH) {
-					this.turnLeft(delta);
-				} else if (move.orientation == Direction.SOUTH) {
+			if (move.orientation == ManoeuvreFactory.getAntiClockwiseDirection(this.getOrientation())) {
+				this.turnLeft(delta);
+			} else if (move.orientation == ManoeuvreFactory.getClockwiseDirection(this.getOrientation())) {
+				this.turnRight(delta);
+			} else if (move.orientation == this.getOrientation()) {
+				if (this.getAngle() - move.angle > 0) {
 					this.turnRight(delta);
-				} else if (move.orientation == Direction.EAST) {
-					if (this.getAngle() - move.angle > 0) {
-						this.turnRight(delta);
-					} else {
-						this.turnLeft(delta);
-					}
-				}
-			}
-			
-			if (this.getOrientation() == Direction.WEST) {
-				if (move.orientation == Direction.NORTH) {
-					this.turnRight(delta);
-				} else if (move.orientation == Direction.SOUTH) {
-					this.turnLeft(delta);
-				}
-			}
-			
-			if (this.getOrientation() == Direction.NORTH) {
-				if (move.orientation == Direction.WEST) {
-					this.turnLeft(delta);
-				} else if (move.orientation == Direction.EAST) {
-					this.turnRight(delta);
-				}
-			}
-			
-			if (this.getOrientation() == Direction.SOUTH) {
-				if (move.orientation == Direction.WEST) {
-					this.turnRight(delta);
-				} else if (move.orientation == Direction.EAST) {
+				} else {
 					this.turnLeft(delta);
 				}
 			}
