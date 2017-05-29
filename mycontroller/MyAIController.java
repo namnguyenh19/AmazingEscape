@@ -70,11 +70,12 @@ public class MyAIController extends CarController{
 
 	@Override
 	public void update(float delta) {
-		// TODO: replace with View and Path logic
 		// Retrieve local surrounding of car, to be fed into View class to interpret it
 		
 		View currentView = new View(getView(), this.getOrientation(), getCurPos());
 		checkStateChange();
+		
+		System.out.println("Current position: " + getCurPos() + "\nCurrent orientation: " + getOrientation());
 		
 		if (!prevLocation.equals(new Coordinate(this.getPosition()))) {
 			visited.add(prevLocation);
@@ -85,44 +86,114 @@ public class MyAIController extends CarController{
 			this.applyMove(delta);
 			return;
 		}
-
-		// If you are not following a wall initially, find a wall to stick to!
-		if(!currentView.checkFollowingWall()) {	
-			// Turn to a direction so that when we hit a wall, we can turn
-			// to left of the wall
-			actions.addAll(ManoeuvreFactory.followWall(this));
+		
+		boolean nearDeadEnd = currentView.checkDeadEnd();
+		List<Move> newMoves = null;
+		
+		if (nearDeadEnd) {
+							
+			// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
+			// TODO: make checkSpace() public
+			currentView.checkSpace();
 			
-		}
-		// Once the car is already stuck to a wall, apply the following logic
-		else {
-						
-			boolean nearDeadEnd = currentView.checkDeadEnd();
-			List<Move> newMoves = null;
-			
-			if (nearDeadEnd) {
-								
-				// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
-				// TODO: make checkSpace() public
-				currentView.checkSpace();
-				
-				// TODO: do we need to find the dest variable?
-				if (currentView.isCanUTurn()) {
-					newMoves = ManoeuvreFactory.uTurn(this);
-				} else if (currentView.isCanThreePoint()) {
-					newMoves = ManoeuvreFactory.threePointTurn(this);
-				} else {
-					newMoves = ManoeuvreFactory.reverseTurn(this);
-				}
-				
-				actions.addAll(newMoves);
+			// TODO: do we need to find the dest variable?
+			if (currentView.isCanUTurn()) {
+				newMoves = ManoeuvreFactory.uTurn(this);
+			} else if (currentView.isCanThreePoint()) {
+				newMoves = ManoeuvreFactory.threePointTurn(this);
 			} else {
-				
-				Path bestPath = this.findBestPath(currentView.getPaths());
-				
-				newMoves = ManoeuvreFactory.followPath(this, bestPath);
-				
-				actions.addAll(newMoves);
+				newMoves = ManoeuvreFactory.reverseTurn(this);
 			}
+			
+			System.out.println("near Deadend");
+			for(Move m : newMoves){
+				System.out.println(m.toString());
+			}
+			
+			actions.addAll(newMoves);
+		} else {
+			
+			//TODO CHECKCORNERAHDEAD not working
+			if(currentView.checkCornerAhead()){
+				System.out.println("Should turn left here");
+				return;
+			}
+			
+			for(Path p : currentView.getPaths()){
+				System.out.println(p.toString());
+			}
+			
+			Path bestPath = this.findBestPath(currentView.getPaths());
+			
+			
+			System.out.println("Chosen path: " + bestPath.toString());
+			
+			newMoves = ManoeuvreFactory.followPath(this, bestPath);
+			
+			System.out.println("not near Deadend");
+			for(Move m : newMoves){
+				System.out.println(m.toString());
+			}
+			
+			actions.addAll(newMoves);
+		}
+
+//		// If you are not following a wall initially, find a wall to stick to!
+//		if(!currentView.checkFollowingWall()) {
+//			
+//			System.out.println("Following Wall");
+//			
+//			// Turn to a direction so that when we hit a wall, we can turn
+//			// to left of the wall
+//			List<Move> newMoves = ManoeuvreFactory.followWall(this);
+//			
+//			for(Move m : newMoves){
+//				System.out.println(m.toString());
+//			}
+//			
+//			actions.addAll(newMoves);
+//			
+//		}
+//		// Once the car is already stuck to a wall, apply the following logic
+//		else {
+//						
+//			boolean nearDeadEnd = currentView.checkDeadEnd();
+//			List<Move> newMoves = null;
+//			
+//			if (nearDeadEnd) {
+//								
+//				// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
+//				// TODO: make checkSpace() public
+//				currentView.checkSpace();
+//				
+//				// TODO: do we need to find the dest variable?
+//				if (currentView.isCanUTurn()) {
+//					newMoves = ManoeuvreFactory.uTurn(this);
+//				} else if (currentView.isCanThreePoint()) {
+//					newMoves = ManoeuvreFactory.threePointTurn(this);
+//				} else {
+//					newMoves = ManoeuvreFactory.reverseTurn(this);
+//				}
+//				
+//				System.out.println("near Deadend");
+//				for(Move m : newMoves){
+//					System.out.println(m.toString());
+//				}
+//				
+//				actions.addAll(newMoves);
+//			} else {
+//				
+//				Path bestPath = this.findBestPath(currentView.getPaths());
+//				
+//				newMoves = ManoeuvreFactory.followPath(this, bestPath);
+//				
+//				System.out.println("not near Deadend");
+//				for(Move m : newMoves){
+//					System.out.println(m.toString());
+//				}
+//				
+//				actions.addAll(newMoves);
+//			}
 			
 			/**
 
@@ -162,7 +233,7 @@ public class MyAIController extends CarController{
 			}
 			
 			**/
-		}
+		
 	}
 	
 	private void applyMove(float delta) {
