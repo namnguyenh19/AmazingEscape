@@ -107,8 +107,6 @@ public class MyAIController extends CarController{
 			
 			System.out.println("near Deadend");
 
-			System.exit(1);
-
 			actions.addAll(newMoves);
 		} else {
 			
@@ -131,9 +129,7 @@ public class MyAIController extends CarController{
 			
 			newMoves = ManoeuvreFactory.followPath(this, bestPath);
 			
-			for(Move m : newMoves){
-				System.out.println(m.toString());
-			}
+			System.out.println(newMoves.get(0));
 			
 			actions.addAll(newMoves);
 		}
@@ -238,13 +234,16 @@ public class MyAIController extends CarController{
 	
 	private void applyMove(float delta) {
 		Move move = actions.poll();
-		
+
+		if (move == null) {
+			actions.removeAll(actions);
+			return;
+		}
+
 		// if current Move has been done due to reaching dest
 		if (move.dest != null && move.dest.equals(new Coordinate(this.getPosition()))) {
-
-			if (move == null) {
-				return;
-			}
+			actions.removeAll(actions);
+			return;
 		}
 
 		if (Math.abs(this.getAngle() - move.angle) > ROTATE_EPSILON) {
