@@ -71,10 +71,10 @@ public class MyAIController extends CarController{
 	@Override
 	public void update(float delta) {
 		// Retrieve local surrounding of car, to be fed into View class to interpret it
-		
+
 		View currentView = new View(getView(), this.getOrientation(), getCurPos());
 		checkStateChange();
-				
+
 		if (!prevLocation.equals(new Coordinate(this.getPosition()))) {
 			visited.add(prevLocation);
 			prevLocation = new Coordinate(this.getPosition());
@@ -84,10 +84,7 @@ public class MyAIController extends CarController{
 			this.applyMove(delta);
 			return;
 		}
-		else {
-			System.out.println("Recharge moves");
-		}
-		
+
 		boolean nearDeadEnd = currentView.checkDeadEnd();
 		List<Move> newMoves = null;
 		
@@ -113,9 +110,9 @@ public class MyAIController extends CarController{
 			System.out.println("Current position: " + getCurPos() + "\nCurrent orientation: " + getOrientation());
 
 			//TODO CHECKCORNERAHDEAD not working
-			if(currentView.checkCornerAhead()){
-				System.out.println("Should turn left here");
-				return;
+			if(currentView.checkWallAhead() || currentView.checkCornerAhead()){
+				//reduce speed
+				applyBrake();
 			}
 
 			//DEBUG PRINT ALL PATHS
@@ -129,7 +126,7 @@ public class MyAIController extends CarController{
 			
 			newMoves = ManoeuvreFactory.followPath(this, bestPath);
 			
-			System.out.println(newMoves.get(0));
+//			System.out.println(newMoves.get(0));
 			
 			actions.addAll(newMoves);
 		}
