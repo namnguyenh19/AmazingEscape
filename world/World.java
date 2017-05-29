@@ -10,7 +10,6 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 
 import controller.CarController;
-import controller.ManualController;
 import mycontroller.MyAIController;
 import tiles.MapTile;
 import tiles.TrapTile;

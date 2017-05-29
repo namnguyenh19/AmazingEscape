@@ -2,16 +2,12 @@ package mycontroller;
 
 import controller.CarController;
 import utilities.Coordinate;
-import utilities.PeekTuple;
 import world.Car;
-import world.WorldSpatial;
 import world.WorldSpatial.Direction;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 /**
  * Our AI auto-controller.
@@ -41,18 +37,10 @@ public class MyAIController extends CarController{
 	 */
 	
 	List<Move> actions;
-
-	private boolean isTurningLeft = false;
-	private boolean isTurningRight = false;
-	private WorldSpatial.Direction previousState = null; // Keeps track of the previous state
-
 	// Car Speed to move at
 	private final float CAR_SPEED = 2;
 	
 	private static final float ROTATE_EPSILON = 0.1f;
-
-	// Offset used to differentiate between 0 and 360 degrees
-	private int EAST_THRESHOLD = 3;
 
 	private HashSet<Coordinate> visited;
 	/** The tile we want to move to. */
@@ -64,8 +52,6 @@ public class MyAIController extends CarController{
 		actions = new ArrayList<Move>();
 		visited = new HashSet<Coordinate>();
 		visitedPaths = new ArrayList<Path>();
-		
-		previousState = this.getOrientation();
 	}
 
 
