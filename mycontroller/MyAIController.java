@@ -243,15 +243,54 @@ public class MyAIController extends CarController{
 		if (move.dest != null && move.dest.equals(new Coordinate(this.getPosition()))) {
 			actions.poll();
 			move = actions.peek();
+			
+			if (move == null) {
+				return;
+			}
 		}
+		
+		System.out.println(move);
 		
 		if (Math.abs(this.getAngle() - move.angle) > ROTATE_EPSILON) {
 			// TODO: simple code, assumes the car is facing in the angle to do this
 			// TODO: need to test for reverse case
-			if (move.orientation == Direction.WEST || move.orientation == Direction.SOUTH) {
-				this.turnLeft(delta);
-			} else {
-				this.turnRight(delta);
+			
+			if (this.getOrientation() == Direction.EAST) {
+				if (move.orientation == Direction.NORTH) {
+					this.turnLeft(delta);
+				} else if (move.orientation == Direction.SOUTH) {
+					this.turnRight(delta);
+				} else if (move.orientation == Direction.EAST) {
+					if (this.getAngle() - move.angle > 0) {
+						this.turnRight(delta);
+					} else {
+						this.turnLeft(delta);
+					}
+				}
+			}
+			
+			if (this.getOrientation() == Direction.WEST) {
+				if (move.orientation == Direction.NORTH) {
+					this.turnRight(delta);
+				} else if (move.orientation == Direction.SOUTH) {
+					this.turnLeft(delta);
+				}
+			}
+			
+			if (this.getOrientation() == Direction.NORTH) {
+				if (move.orientation == Direction.WEST) {
+					this.turnLeft(delta);
+				} else if (move.orientation == Direction.EAST) {
+					this.turnRight(delta);
+				}
+			}
+			
+			if (this.getOrientation() == Direction.SOUTH) {
+				if (move.orientation == Direction.WEST) {
+					this.turnRight(delta);
+				} else if (move.orientation == Direction.EAST) {
+					this.turnLeft(delta);
+				}
 			}
 		}
 		

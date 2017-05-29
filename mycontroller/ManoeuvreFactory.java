@@ -127,6 +127,7 @@ public class ManoeuvreFactory {
 
     public static List<Move> followPath(MyAIController ctrl, Path path) {
     	List<Move> ret = new ArrayList<Move>();
+    	
     	// keep track of position based on traversing a path, starting at current
     	// car position
     	Coordinate currentPos = new Coordinate(ctrl.getPosition());
@@ -135,23 +136,27 @@ public class ManoeuvreFactory {
     		Coordinate c = path.getTilesInPath().get(i);
     		float angle = getAngleTwoPts(currentPos, c);
     		
-    		Direction orientation;
-    	    
+    		Direction orientation = null;
+
     	    // TODO: Do we even need to record this??
-    	    if (angle <= WorldSpatial.NORTH_DEGREE) {
+    		if ((int)angle == WorldSpatial.EAST_DEGREE_MIN || angle > WorldSpatial.SOUTH_DEGREE) {
+    			orientation = Direction.EAST;
+    		} else if (angle <= WorldSpatial.NORTH_DEGREE) {
     	    	orientation = Direction.NORTH;
     	    } else if (angle <= WorldSpatial.WEST_DEGREE) {
     	    	orientation = Direction.WEST;
     	    } else if (angle <= WorldSpatial.SOUTH_DEGREE) {
     	    	orientation = Direction.SOUTH;
-    	    } else {
-    	    	orientation = Direction.EAST;
     	    }
     	    
     	    ret.add(new Move(c, orientation, angle, false));
     	    
     	    // moving to new point 'c' leads us to the car's new current position
     	    currentPos = c;
+    	}
+    	
+    	for (Move m : ret) {
+    		System.out.println(m);
     	}
 
         return ret;

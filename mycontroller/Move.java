@@ -23,6 +23,6 @@ public class Move {
     }
     
     public String toString(){
-    	return "Going toward " + this.orientation + " with angle of " + this.angle;
+    	return "Going to " + dest + " with orientation " + this.orientation + " and angle " + this.angle;
     }
 }
