@@ -236,7 +236,6 @@ public class MyAIController extends CarController{
 		Move move = actions.poll();
 
 		if (move == null) {
-			actions.removeAll(actions);
 			return;
 		}
 
