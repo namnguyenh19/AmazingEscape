@@ -172,6 +172,7 @@ public class View {
     	
     	ArrayList<WorldSpatial.Direction> possibleOrients = new ArrayList<WorldSpatial.Direction>();
     	
+    	// if path is too long
     	if (p.getTilesInPath().size() > 3) {
 			p.getTilesInPath().remove(0); // TODO: fix
 			list.add(p);
@@ -181,6 +182,7 @@ public class View {
     	MapTile testTile = this.curView.get(ManoeuvreFactory.addCoords(currentPos, 
     			ManoeuvreFactory.toCoordinate(ManoeuvreFactory.getClockwiseDirection(currOrient))));
     	
+    	// determine possible directions, based on keeping left to the wall
     	if (!testTile.getName().equals("Wall")) {
     		
     		testTile = this.curView.get(ManoeuvreFactory.addCoords(currentPos, ManoeuvreFactory.toCoordinate(currOrient)));
@@ -204,18 +206,17 @@ public class View {
     		Coordinate newPos = new Coordinate(coAdd.x + currentPos.x, coAdd.y + currentPos.y);
     		MapTile tile = this.curView.get(newPos);
     		
+    		// if the next tile in the path is not in our local view
     		if (tile == null) {
     			numNull++;
     			continue;
     		}
     		
+    		// add to path if it's not a wall
     		if (!tile.getName().equals("Wall")) {
     	    	ArrayList<Coordinate> newCoords = new ArrayList<Coordinate>(p.getTilesInPath());
     	    	newCoords.add(newPos);
     	    	
-    	    	// for debugging purposes
-    	    	System.out.print("NewPath " + checkFollowingWall(currentPos) + " " + currentPos + " " + currOrient + " " + d + ": " + newCoords.toString() + "\n");
-
     	    	Path newPath = new Path(this.curView, newCoords, curDir);
     	    	recursive(list, newPath, currOrient, d);
     		} else {
@@ -223,9 +224,10 @@ public class View {
     		}
     	}
     	
+    	// if there are no possible directions to extend the path, but path isn't empty
     	if (numNull == possibleOrients.size()) {
     		if (p.getTilesInPath().size() > 0) {
-    			p.getTilesInPath().remove(0); // TODO: fix
+    			p.getTilesInPath().remove(0);
     			list.add(p);
     		}
     		

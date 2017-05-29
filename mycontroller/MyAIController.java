@@ -74,8 +74,7 @@ public class MyAIController extends CarController{
 		// Retrieve local surrounding of car, to be fed into View class to interpret it
 		
 		View currentView = new View(getView(), this.getOrientation(), getCurPos());
-		//checkStateChange();
-		
+
 		System.out.println("Current position: " + getCurPos() + "\nCurrent orientation: " + getOrientation());
 		
 		visited.add(new Coordinate(getPosition()));
@@ -88,13 +87,11 @@ public class MyAIController extends CarController{
 		boolean nearDeadEnd = currentView.checkDeadEnd();
 		List<Move> newMoves = null;
 		
-		if (nearDeadEnd) {
-							
-			// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
-			// TODO: make checkSpace() public
+		if (nearDeadEnd) { 		// if we're at a dead-end
+			// check if we can do 3-turn or u-turn
 			currentView.checkSpace();
 			
-			// TODO: do we need to find the dest variable?
+			// execute move based on space remaining
 			if (currentView.isCanUTurn()) {
 				newMoves = ManoeuvreFactory.uTurn(this);
 			} else if (currentView.isCanThreePoint()) {
@@ -102,15 +99,10 @@ public class MyAIController extends CarController{
 			} else {
 				newMoves = ManoeuvreFactory.reverseTurn(this);
 			}
-			
-			System.out.println("near Deadend");
-			for(Move m : newMoves){
-				System.out.println(m.toString());
-			}
-			
+
 			actions.addAll(newMoves);
 		} else {
-			
+			// find all potential paths, and move on the best path found
 			List<Path> allPaths = currentView.getPaths();
 			for(Path p : allPaths){
 				System.out.println(p.toString());
@@ -154,20 +146,13 @@ public class MyAIController extends CarController{
 		}
 		
 		float MAX_SPEED = 2f;
-		boolean isTurning = true;
 		boolean prepareTurn = false;
-		
-		
-		Move move2 = null;
-		if (actions.size() >= 2) {
-			move2 = actions.get(1);
-		}
+
 
 		float angleDiff = ManoeuvreFactory.toPrincipalAngle(this.getAngle() - move.angle);
 
+		// do appropriate turn from the current Move, if angle isn't aligned
 		if (Math.abs(angleDiff) > ROTATE_EPSILON) {
-			// TODO: need to test for reverse case
-			
 			if (move.orientation == ManoeuvreFactory.getAntiClockwiseDirection(this.getOrientation())) {
 				this.turnLeft(delta);
 			} else if (move.orientation == ManoeuvreFactory.getClockwiseDirection(this.getOrientation())) {
@@ -178,27 +163,20 @@ public class MyAIController extends CarController{
 				} else {
 					this.turnLeft(delta);
 				}
-			} else {
-				isTurning = false;
 			}
 
-			float factor = Math.abs(this.getAngle() - move.angle)/move.angle;
 			MAX_SPEED = CAR_SPEED * 0.5f;
 		} else {
+			// if there's a wall ahead, reduce speed
 			if (view.checkWallAhead() ) {
-				System.out.println("INCOMING");
 				MAX_SPEED = CAR_SPEED * 0.3f;
 				prepareTurn = true;
 			} else {
 				MAX_SPEED = CAR_SPEED;
 			}
 			
-			isTurning = false;
 		}
 		
-		PeekTuple peekFuture = this.peek(this.getRawVelocity(), getAngle(), null, delta);
-		System.out.println(peekFuture.getReachable() + " " + peekFuture.getCoordinate());
-
 		if (move.reverse && getVelocity() > -MAX_SPEED) {
 			this.applyReverseAcceleration();
 		} else if (prepareTurn && getVelocity() > MAX_SPEED) {
@@ -206,8 +184,6 @@ public class MyAIController extends CarController{
 		} else if (getVelocity() < MAX_SPEED) {
 			this.applyForwardAcceleration();
 		}
-		
-		System.out.println("Velocity = " + this.getVelocity() + " " + this.getRawVelocity());
 	}
 	
 	
@@ -235,171 +211,6 @@ public class MyAIController extends CarController{
 	
 	public HashSet<Coordinate> getVisitedTiles() {
 		return visited;
-	}
-
-	/**
-	 * Readjust the car to the orientation we are in.
-	 * @param lastTurnDirection
-	 * @param delta
-	 */
-	private void readjust(WorldSpatial.RelativeDirection lastTurnDirection, float delta) {
-		if(lastTurnDirection != null){
-			if(!isTurningRight && lastTurnDirection.equals(WorldSpatial.RelativeDirection.RIGHT)){
-				adjustRight(getOrientation(),delta);
-			}
-			else if(!isTurningLeft && lastTurnDirection.equals(WorldSpatial.RelativeDirection.LEFT)){
-				adjustLeft(getOrientation(),delta);
-			}
-		}
-
-	}
-
-	/**
-	 * Try to orient myself to a degree that I was supposed to be at if I am
-	 * misaligned.
-	 */
-	private void adjustLeft(WorldSpatial.Direction orientation, float delta) {
-
-		switch(orientation){
-			case EAST:
-				if(getAngle() > WorldSpatial.EAST_DEGREE_MIN+EAST_THRESHOLD){
-					turnRight(delta);
-				}
-				break;
-			case NORTH:
-				if(getAngle() > WorldSpatial.NORTH_DEGREE){
-					turnRight(delta);
-				}
-				break;
-			case SOUTH:
-				if(getAngle() > WorldSpatial.SOUTH_DEGREE){
-					turnRight(delta);
-				}
-				break;
-			case WEST:
-				if(getAngle() > WorldSpatial.WEST_DEGREE){
-					turnRight(delta);
-				}
-				break;
-
-			default:
-				break;
-		}
-
-	}
-
-	private void adjustRight(WorldSpatial.Direction orientation, float delta) {
-		switch(orientation){
-			case EAST:
-				if(getAngle() > WorldSpatial.SOUTH_DEGREE && getAngle() < WorldSpatial.EAST_DEGREE_MAX){
-					turnLeft(delta);
-				}
-				break;
-			case NORTH:
-				if(getAngle() < WorldSpatial.NORTH_DEGREE){
-					turnLeft(delta);
-				}
-				break;
-			case SOUTH:
-				if(getAngle() < WorldSpatial.SOUTH_DEGREE){
-					turnLeft(delta);
-				}
-				break;
-			case WEST:
-				if(getAngle() < WorldSpatial.WEST_DEGREE){
-					turnLeft(delta);
-				}
-				break;
-
-			default:
-				break;
-		}
-
-	}
-
-	/**
-	 * Checks whether the car's state has changed or not, stops turning if it
-	 *  already has.
-	 */
-	private void checkStateChange() {
-		if(previousState == null){
-			previousState = getOrientation();
-		}
-		else{
-			if(previousState != getOrientation()){
-				if(isTurningLeft){
-					isTurningLeft = false;
-				}
-				if(isTurningRight){
-					isTurningRight = false;
-				}
-				previousState = getOrientation();
-			}
-		}
-	}
-
-	/**
-	 * Turn the car counter clock wise (think of a compass going counter clock-wise)
-	 */
-	private void applyLeftTurn(WorldSpatial.Direction orientation, float delta) {
-		switch(orientation){
-			case EAST:
-				if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
-					turnLeft(delta);
-				}
-				break;
-			case NORTH:
-				if(!getOrientation().equals(WorldSpatial.Direction.WEST)){
-					turnLeft(delta);
-				}
-				break;
-			case SOUTH:
-				if(!getOrientation().equals(WorldSpatial.Direction.EAST)){
-					turnLeft(delta);
-				}
-				break;
-			case WEST:
-				if(!getOrientation().equals(WorldSpatial.Direction.SOUTH)){
-					turnLeft(delta);
-				}
-				break;
-			default:
-				break;
-
-		}
-
-	}
-
-	/**
-	 * Turn the car clock wise (think of a compass going clock-wise)
-	 */
-	private void applyRightTurn(WorldSpatial.Direction orientation, float delta) {
-		switch(orientation){
-			case EAST:
-				if(!getOrientation().equals(WorldSpatial.Direction.SOUTH)){
-					turnRight(delta);
-				}
-				break;
-			case NORTH:
-				if(!getOrientation().equals(WorldSpatial.Direction.EAST)){
-					turnRight(delta);
-				}
-				break;
-			case SOUTH:
-				if(!getOrientation().equals(WorldSpatial.Direction.WEST)){
-					turnRight(delta);
-				}
-				break;
-			case WEST:
-				if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
-					turnRight(delta);
-				}
-				break;
-			default:
-				break;
-
-		}
-
 	}
 	
 	
