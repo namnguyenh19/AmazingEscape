@@ -84,6 +84,9 @@ public class MyAIController extends CarController{
 			this.applyMove(delta);
 			return;
 		}
+		else {
+			System.out.println("Recharge moves");
+		}
 		
 		boolean nearDeadEnd = currentView.checkDeadEnd();
 		List<Move> newMoves = null;
@@ -105,7 +108,7 @@ public class MyAIController extends CarController{
 			System.out.println("near Deadend");
 
 			System.exit(1);
-			
+
 			actions.addAll(newMoves);
 		} else {
 			
@@ -234,20 +237,16 @@ public class MyAIController extends CarController{
 	}
 	
 	private void applyMove(float delta) {
-		Move move = actions.peek();
+		Move move = actions.poll();
 		
 		// if current Move has been done due to reaching dest
 		if (move.dest != null && move.dest.equals(new Coordinate(this.getPosition()))) {
-			actions.poll();
-			move = actions.peek();
-			
+
 			if (move == null) {
 				return;
 			}
 		}
-		
-		System.out.println(move);
-		
+
 		if (Math.abs(this.getAngle() - move.angle) > ROTATE_EPSILON) {
 			// TODO: simple code, assumes the car is facing in the angle to do this
 			// TODO: need to test for reverse case
