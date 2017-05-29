@@ -165,13 +165,20 @@ public class View {
         ArrayList<Path> paths = new ArrayList<>();
 
         if (checkWallAhead()){
+            int noLeft = 1;
+            if(noPathLeft()){
+                // do nothing
+            }
+            else{
+                noLeft = -1;
+            }
 
             //turn right
             Coordinate coor = curPos;
             ArrayList<Coordinate> tiles = new ArrayList<>();
 
             for(int i = 1; i <= VIEW_SQUARE; i++){
-                coor = new Coordinate(curPos.x, curPos.y - i);
+                coor = new Coordinate(curPos.x, curPos.y - i*noLeft);
                 tiles.add(coor);
             }
 
@@ -289,12 +296,20 @@ public class View {
         ArrayList<Path> paths = new ArrayList<>();
 
         if (checkWallAhead()){
-            //turn right
+            int noLeft = 1;
+            if(noPathLeft()){
+                // do nothing
+            }
+            else{
+                noLeft = -1;
+            }
+
+            //turn to correct direction
             Coordinate coor = curPos;
             ArrayList<Coordinate> tiles = new ArrayList<>();
 
             for(int i = 1; i <= VIEW_SQUARE; i++){
-                coor = new Coordinate(curPos.x, curPos.y + i);
+                coor = new Coordinate(curPos.x, curPos.y + noLeft*i);
                 tiles.add(coor);
             }
 
@@ -412,12 +427,21 @@ public class View {
         ArrayList<Path> paths = new ArrayList<>();
 
         if (checkWallAhead()){
-            //turn right
+
+            int noLeft = 1;
+            if(noPathLeft()){
+                // do nothing
+            }
+            else{
+                noLeft = -1;
+            }
+
+            //turn
             Coordinate coor = curPos;
             ArrayList<Coordinate> tiles = new ArrayList<>();
 
             for(int i = 1; i <= VIEW_SQUARE; i++){
-                coor = new Coordinate(curPos.x+i, curPos.y);
+                coor = new Coordinate(curPos.x+i*noLeft, curPos.y);
                 tiles.add(coor);
             }
 
@@ -535,12 +559,21 @@ public class View {
         ArrayList<Path> paths = new ArrayList<>();
 
         if (checkWallAhead()){
+
+            int noLeft = 1;
+            if(noPathLeft()){
+                // do nothing
+            }
+            else{
+                noLeft = -1;
+            }
+
             //turn right
             Coordinate coor = curPos;
             ArrayList<Coordinate> tiles = new ArrayList<>();
 
             for(int i = 1; i <= VIEW_SQUARE; i++){
-                coor = new Coordinate(curPos.x-i, curPos.y);
+                coor = new Coordinate(curPos.x-i*noLeft, curPos.y);
                 tiles.add(coor);
             }
 
@@ -1099,7 +1132,7 @@ public class View {
         return false;
     }
 
-    public boolean checkSouth(Coordinate coor){
+    private boolean checkSouth(Coordinate coor){
         // Check tiles towards the bottom
         for(int i = 0; i < VIEW_SQUARE; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y-i));
@@ -1108,5 +1141,20 @@ public class View {
             }
         }
         return false;
+    }
+
+    private boolean noPathLeft(){
+        switch (this.curDir){
+            case SOUTH:
+                return checkEast(curPos);
+            case NORTH:
+                return checkWest(curPos);
+            case WEST:
+                return checkSouth(curPos);
+            case EAST:
+                return checkNorth(curPos);
+            default:
+                return false;
+        }
     }
 }
