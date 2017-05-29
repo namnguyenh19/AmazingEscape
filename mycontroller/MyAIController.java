@@ -74,9 +74,7 @@ public class MyAIController extends CarController{
 		
 		View currentView = new View(getView(), this.getOrientation(), getCurPos());
 		checkStateChange();
-		
-		System.out.println("Current position: " + getCurPos() + "\nCurrent orientation: " + getOrientation());
-		
+				
 		if (!prevLocation.equals(new Coordinate(this.getPosition()))) {
 			visited.add(prevLocation);
 			prevLocation = new Coordinate(this.getPosition());
@@ -93,7 +91,6 @@ public class MyAIController extends CarController{
 		if (nearDeadEnd) {
 							
 			// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
-			// TODO: make checkSpace() public
 			currentView.checkSpace();
 			
 			// TODO: do we need to find the dest variable?
@@ -106,31 +103,31 @@ public class MyAIController extends CarController{
 			}
 			
 			System.out.println("near Deadend");
-			for(Move m : newMoves){
-				System.out.println(m.toString());
-			}
+
+			System.exit(1);
 			
 			actions.addAll(newMoves);
 		} else {
 			
+			System.out.println("Current position: " + getCurPos() + "\nCurrent orientation: " + getOrientation());
+
 			//TODO CHECKCORNERAHDEAD not working
 			if(currentView.checkCornerAhead()){
 				System.out.println("Should turn left here");
 				return;
 			}
-			
-			for(Path p : currentView.getPaths()){
-				System.out.println(p.toString());
-			}
+
+			//DEBUG PRINT ALL PATHS
+//			for(Path p : currentView.getPaths()){
+//				System.out.println(p.toString());
+//			}
 			
 			Path bestPath = this.findBestPath(currentView.getPaths());
-			
 			
 			System.out.println("Chosen path: " + bestPath.toString());
 			
 			newMoves = ManoeuvreFactory.followPath(this, bestPath);
 			
-			System.out.println("not near Deadend");
 			for(Move m : newMoves){
 				System.out.println(m.toString());
 			}
