@@ -47,7 +47,7 @@ public class MyAIController extends CarController{
 	private WorldSpatial.Direction previousState = null; // Keeps track of the previous state
 
 	// Car Speed to move at
-	private final float CAR_SPEED = 3;
+	private final float CAR_SPEED = 2;
 	
 	private static final float ROTATE_EPSILON = 0.1f;
 
@@ -154,17 +154,18 @@ public class MyAIController extends CarController{
 		}
 		
 		float MAX_SPEED = 2f;
-		boolean prepareRotation = false;
+		boolean isTurning = true;
+		boolean prepareTurn = false;
 		
 		
 		Move move2 = null;
-		if (actions.size() >= 3 && actions.get(2).orientation != this.getOrientation()) {
-			move2 = actions.get(2);
-		} else if (actions.size() >= 2) {
+		if (actions.size() >= 2) {
 			move2 = actions.get(1);
 		}
-		
-		if (Math.abs(this.getAngle() - move.angle) > ROTATE_EPSILON) {
+
+		float angleDiff = ManoeuvreFactory.toPrincipalAngle(this.getAngle() - move.angle);
+
+		if (Math.abs(angleDiff) > ROTATE_EPSILON) {
 			// TODO: need to test for reverse case
 			
 			if (move.orientation == ManoeuvreFactory.getAntiClockwiseDirection(this.getOrientation())) {
@@ -177,26 +178,30 @@ public class MyAIController extends CarController{
 				} else {
 					this.turnLeft(delta);
 				}
+			} else {
+				isTurning = false;
 			}
 
 			float factor = Math.abs(this.getAngle() - move.angle)/move.angle;
-			MAX_SPEED = factor * CAR_SPEED * 0.5f;
+			MAX_SPEED = CAR_SPEED * 0.5f;
 		} else {
-			if (move2 != null && move2.orientation != this.getOrientation()) {
+			if (view.checkWallAhead() ) {
 				System.out.println("INCOMING");
-				MAX_SPEED = CAR_SPEED * 0.5f;
-				prepareRotation = true;
+				MAX_SPEED = CAR_SPEED * 0.3f;
+				prepareTurn = true;
 			} else {
 				MAX_SPEED = CAR_SPEED;
 			}
 			
-			
+			isTurning = false;
 		}
 		
 		PeekTuple peekFuture = this.peek(this.getRawVelocity(), getAngle(), null, delta);
 		System.out.println(peekFuture.getReachable() + " " + peekFuture.getCoordinate());
 
 		if (move.reverse && getVelocity() > -MAX_SPEED) {
+			this.applyReverseAcceleration();
+		} else if (prepareTurn && getVelocity() > MAX_SPEED) {
 			this.applyReverseAcceleration();
 		} else if (getVelocity() < MAX_SPEED) {
 			this.applyForwardAcceleration();

@@ -175,7 +175,7 @@ public class ManoeuvreFactory {
     /**
      * Returns angle between 0 and 360 degrees.
      */
-    private static float toPrincipalAngle(float angle) {
+    public static float toPrincipalAngle(float angle) {
     	return (angle + 360) % 360;
     }
     
