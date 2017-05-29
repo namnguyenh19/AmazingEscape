@@ -148,7 +148,8 @@ public class ManoeuvreFactory {
     	    } else if (angle <= WorldSpatial.SOUTH_DEGREE) {
     	    	orientation = Direction.SOUTH;
     	    }
-    	    
+    		
+
     	    ret.add(new Move(c, orientation, angle, false));
     	    
     	    // moving to new point 'c' leads us to the car's new current position
@@ -187,7 +188,7 @@ public class ManoeuvreFactory {
 		return toPrincipalAngle(angle); 
     }
     
-    private static Coordinate addCoords(Coordinate c1, Coordinate c2) {
+    public static Coordinate addCoords(Coordinate c1, Coordinate c2) {
     	return new Coordinate(c1.x + c2.x, c1.y + c2.y);
     }
     
@@ -256,7 +257,7 @@ public class ManoeuvreFactory {
     /** Converts angle to a Direction enum; if the angle none
      * of the enum values then null is returned.
      */
-    public static Direction toDirection(int angle) {
+    public static Direction toDirection(float angle) {
     	angle = (int)toPrincipalAngle(angle);
     	
     	if (angle == WorldSpatial.NORTH_DEGREE) {

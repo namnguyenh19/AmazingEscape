@@ -7,6 +7,7 @@ import world.WorldSpatial;
 import world.WorldSpatial.Direction;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -38,7 +39,7 @@ public class MyAIController extends CarController{
 	 * 
 	 */
 	
-	Queue<Move> actions;
+	List<Move> actions;
 
 	private boolean isTurningLeft = false;
 	private boolean isTurningRight = false;
@@ -47,24 +48,23 @@ public class MyAIController extends CarController{
 	// Car Speed to move at
 	private final float CAR_SPEED = 3;
 	
-	private static final float ROTATE_EPSILON = 3;
+	private static final float ROTATE_EPSILON = 1;
 
 	// Offset used to differentiate between 0 and 360 degrees
 	private int EAST_THRESHOLD = 3;
 
-	private List<Coordinate> visited;
-	/** The previous tile the car was on. */
-	private Coordinate prevLocation;
+	private HashSet<Coordinate> visited;
 	/** The tile we want to move to. */
-	private Coordinate currentDest;
+	private List<Path> visitedPaths;
 
 	public MyAIController(Car car) {
 		super(car);
 		
-		actions = new LinkedList<Move>();
-		visited = new ArrayList<Coordinate>();
-		currentDest = new Coordinate(car.getPosition());
-		prevLocation = currentDest;
+		actions = new ArrayList<Move>();
+		visited = new HashSet<Coordinate>();
+		visitedPaths = new ArrayList<Path>();
+		
+		previousState = this.getOrientation();
 	}
 
 
@@ -73,17 +73,14 @@ public class MyAIController extends CarController{
 		// Retrieve local surrounding of car, to be fed into View class to interpret it
 		
 		View currentView = new View(getView(), this.getOrientation(), getCurPos());
-		checkStateChange();
+		//checkStateChange();
 		
 		System.out.println("Current position: " + getCurPos() + "\nCurrent orientation: " + getOrientation());
 		
-		if (!prevLocation.equals(new Coordinate(this.getPosition()))) {
-			visited.add(prevLocation);
-			prevLocation = new Coordinate(this.getPosition());
-		}
-		
+		visited.add(new Coordinate(getPosition()));
+
 		if (actions.size() > 0) {
-			this.applyMove(delta);
+			this.applyMove(delta, currentView);
 			return;
 		}
 		
@@ -113,12 +110,6 @@ public class MyAIController extends CarController{
 			actions.addAll(newMoves);
 		} else {
 			
-			//TODO CHECKCORNERAHDEAD not working
-			if(currentView.checkCornerAhead()){
-				System.out.println("Should turn left here");
-				return;
-			}
-			
 			List<Path> allPaths = currentView.getPaths();
 			for(Path p : allPaths){
 				System.out.println(p.toString());
@@ -126,7 +117,7 @@ public class MyAIController extends CarController{
 			System.out.println("Number of paths found: " + allPaths.size());
 			
 			Path bestPath = this.findBestPath(allPaths);
-			
+			this.visitedPaths.add(bestPath);
 			
 			System.out.println("Chosen path: " + bestPath.toString());
 			
@@ -139,124 +130,32 @@ public class MyAIController extends CarController{
 			
 			actions.addAll(newMoves);
 		}
-
-//		// If you are not following a wall initially, find a wall to stick to!
-//		if(!currentView.checkFollowingWall()) {
-//			
-//			System.out.println("Following Wall");
-//			
-//			// Turn to a direction so that when we hit a wall, we can turn
-//			// to left of the wall
-//			List<Move> newMoves = ManoeuvreFactory.followWall(this);
-//			
-//			for(Move m : newMoves){
-//				System.out.println(m.toString());
-//			}
-//			
-//			actions.addAll(newMoves);
-//			
-//		}
-//		// Once the car is already stuck to a wall, apply the following logic
-//		else {
-//						
-//			boolean nearDeadEnd = currentView.checkDeadEnd();
-//			List<Move> newMoves = null;
-//			
-//			if (nearDeadEnd) {
-//								
-//				// TODO: for the dead end case. Do we need cornerAhead to be checked given we have paths?
-//				// TODO: make checkSpace() public
-//				currentView.checkSpace();
-//				
-//				// TODO: do we need to find the dest variable?
-//				if (currentView.isCanUTurn()) {
-//					newMoves = ManoeuvreFactory.uTurn(this);
-//				} else if (currentView.isCanThreePoint()) {
-//					newMoves = ManoeuvreFactory.threePointTurn(this);
-//				} else {
-//					newMoves = ManoeuvreFactory.reverseTurn(this);
-//				}
-//				
-//				System.out.println("near Deadend");
-//				for(Move m : newMoves){
-//					System.out.println(m.toString());
-//				}
-//				
-//				actions.addAll(newMoves);
-//			} else {
-//				
-//				Path bestPath = this.findBestPath(currentView.getPaths());
-//				
-//				newMoves = ManoeuvreFactory.followPath(this, bestPath);
-//				
-//				System.out.println("not near Deadend");
-//				for(Move m : newMoves){
-//					System.out.println(m.toString());
-//				}
-//				
-//				actions.addAll(newMoves);
-//			}
-			
-			/**
-
-			// Readjust the car if it is misaligned.
-			readjust(lastTurnDirection,delta);
-
-			if(isTurningRight){
-				applyRightTurn(getOrientation(),delta);
-			}
-			else if(isTurningLeft){
-				// Apply the left turn if you are not currently near a wall.
-				if(!currentView.checkFollowingWall()){
-					applyLeftTurn(getOrientation(),delta);
-				}
-				else{
-					isTurningLeft = false;
-				}
-			}
-			// Try to determine whether or not the car is next to a wall.
-			else if(currentView.checkFollowingWall()){
-				// Maintain some velocity
-				if(getVelocity() < CAR_SPEED){
-					applyForwardAcceleration();
-				}
-				// If there is wall ahead, turn right!
-				if(currentView.checkCornerAhead()){
-					lastTurnDirection = WorldSpatial.RelativeDirection.RIGHT;
-					isTurningRight = true;
-
-				}
-
-			}
-			// This indicates that I can do a left turn if I am not turning right
-			else{
-				lastTurnDirection = WorldSpatial.RelativeDirection.LEFT;
-				isTurningLeft = true;
-			}
-			
-			**/
-		
 	}
 	
-	private void applyMove(float delta) {
-		Move move = actions.peek();
+	private void applyMove(float delta, View view) {
+		Move move = actions.get(0);
 		
 		if (move == null) {
 			return;
 		}
 		
+		System.out.println("Num actions left: " + actions.size() + " " + this.getOrientation());
+		
 		// if current Move has been done due to reaching dest
 		if (move.dest != null && move.dest.equals(new Coordinate(this.getPosition()))) {
-			actions.poll();
-			move = actions.peek();
+			actions.remove(0);
 			
-			if (move == null) {
+			if (actions.size() > 0) {
+				move = actions.get(0);
+			} else {
 				return;
 			}
 		}
 		
-		System.out.println(move);
-		
+		float MAX_SPEED = 2f;
+		boolean isRotating = true;
+		Move move2 = actions.size() > 1 ? actions.get(1) : null;
+
 		if (Math.abs(this.getAngle() - move.angle) > ROTATE_EPSILON) {
 			// TODO: need to test for reverse case
 			
@@ -265,42 +164,64 @@ public class MyAIController extends CarController{
 			} else if (move.orientation == ManoeuvreFactory.getClockwiseDirection(this.getOrientation())) {
 				this.turnRight(delta);
 			} else if (move.orientation == this.getOrientation()) {
-				if (this.getAngle() - move.angle > 0) {
+				if ((move.orientation == Direction.EAST && this.getAngle() - move.angle < 0) || this.getAngle() - move.angle > 0) {
 					this.turnRight(delta);
 				} else {
 					this.turnLeft(delta);
 				}
+			} else {
+				isRotating = false;
 			}
+			
+			
+			MAX_SPEED = Math.abs(this.getAngle() - move.angle)/move.angle * CAR_SPEED * 0.2f;
+		} else {
+			if (move2 != null && move2.orientation != move.orientation) {
+				System.out.println("INCOMING");
+				MAX_SPEED = 0.2f * CAR_SPEED;
+			} else {
+				isRotating = false;
+				MAX_SPEED = CAR_SPEED;
+			}
+			
+			
 		}
 		
-		if (move.reverse && getVelocity() > -CAR_SPEED) {
+		if (move.reverse && getVelocity() > -MAX_SPEED) {
 			this.applyReverseAcceleration();
-		} else if (getVelocity() < CAR_SPEED) {
+		} else if (isRotating && getVelocity() > MAX_SPEED) {
+			this.applyReverseAcceleration();
+		} else if (getVelocity() < MAX_SPEED) {
 			this.applyForwardAcceleration();
 		}
+		
+		System.out.println(this.getVelocity());
 	}
 	
-	private Path findBestPath(List<Path> paths) {
-		double pathCosts[] = new double[paths.size()];
-
-		for(int i = 0; i < paths.size(); i++){
-			pathCosts[i] = paths.get(i).calculatePathCost();
-		}
-
-		int minIndex = 0;
-		double minVal = pathCosts[0];
-
-		for(int i = 0; i < pathCosts.length; i++){
-			if (pathCosts[i] < minVal){
-				minVal = pathCosts[i];
-				minIndex = i;
+	
+	private Path findBestPath(List<Path> paths) {		
+		double minVal = paths.get(0).calculatePathCost();
+		Path bestPath = paths.get(0);
+		
+		for (Path p : paths) {
+			if (visitedPaths.contains(p)) {
+				continue;
+			}
+			
+			if (p.validatePath()) {
+				double cost = p.calculatePathCost();
+				
+				if (cost < minVal) {
+					minVal = cost;
+					bestPath = p;
+				}
 			}
 		}
 
-		return paths.get(minIndex);
+		return bestPath;
 	}
 	
-	public List<Coordinate> getVisitedTiles() {
+	public HashSet<Coordinate> getVisitedTiles() {
 		return visited;
 	}
 

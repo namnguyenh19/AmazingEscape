@@ -1,6 +1,7 @@
 package mycontroller;
 
 import tiles.MapTile;
+import tiles.UtilityTile;
 import utilities.Coordinate;
 import world.WorldSpatial;
 import world.WorldSpatial.Direction;
@@ -66,23 +67,34 @@ public class Path {
 
         return totalCost;
     }
+    
+    public boolean equals(Object c){
+		if(c == this){
+			return true;
+		} else if(!(c instanceof Path)){
+			return false;
+		}
+		
+		boolean result = this.getTilesInPath().equals(((Path)c).getTilesInPath());
+		return result;
+	}
 
     public boolean validatePath(){
         boolean isValid = true;
 
         if (tileName.containsValue("Lava")){
             LavaHandler handler = new LavaHandler(false, view);
-            isValid = handler.handleTrap(this);
+            isValid &= handler.handleTrap(this);
         }
 
         if (tileName.containsValue("Mud")){
             MudHandler handler = new MudHandler(false, view);
-            isValid = handler.handleTrap(this);
+            isValid &= handler.handleTrap(this);
         }
 
         if (tileName.containsValue("Grass")){
             GrassHandler handler = new GrassHandler(false, view);
-            isValid = handler.handleTrap(this);
+            isValid &= handler.handleTrap(this);
         }
 
         return isValid;
@@ -110,7 +122,7 @@ public class Path {
                 }
             }
             else{
-                if (curTile.getName().equals("Utility")){
+                if (curTile.getName().equals("Utility") && ((UtilityTile)curTile).isExit()){
                     tileName.put(c, "Exit");
                 }
                 else {

@@ -30,6 +30,6 @@ public class ManualController extends CarController{
         	turnRight(delta);
         }
         
-        System.out.println(this.getPosition());
+        System.out.println(this.getPosition() + " " + this.getAngle());
 	}
 }

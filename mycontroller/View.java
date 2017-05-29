@@ -108,24 +108,28 @@ public class View {
         }
 
     }
-
-    /**
-     * Check if there is a corner ahead
-     */
-    public boolean checkCornerAhead(){
+    
+    private boolean checkCornerAhead(Coordinate pos){
 
         switch (this.curDir){
             case EAST:
-                return checkCornerEast();
+                return checkCornerEast(pos);
             case NORTH:
-                return checkCornerNorth();
+                return checkCornerNorth(pos);
             case SOUTH:
-                return checkCornerSouth();
+                return checkCornerSouth(pos);
             case WEST:
-                return checkCornerWest();
+                return checkCornerWest(pos);
             default:
                 return false;
         }
+    }
+    
+    /**
+     * Check if there is a corner ahead
+     */
+    public boolean checkCornerAhead() {
+    	return checkCornerAhead(this.curPos);
     }
 
     /**
@@ -154,7 +158,8 @@ public class View {
         if (checkDeadEnd()){
             return null;
         }
-
+        
+        /**
         ArrayList<Path> paths = new ArrayList<>();
 
         switch (this.curDir){
@@ -173,6 +178,8 @@ public class View {
         }
 
         return paths;
+        **/
+        return getPaths2();
     }
     
     
@@ -193,8 +200,36 @@ public class View {
     private void recursive(ArrayList<Path> list, Path p, WorldSpatial.Direction prevOrient, WorldSpatial.Direction currOrient) {
     	Coordinate currentPos = p.getTilesInPath().get(p.getTilesInPath().size() - 1);
     	
-    	WorldSpatial.Direction possibleOrients[] = {ManoeuvreFactory.getAntiClockwiseDirection(currOrient),
-    								prevOrient, ManoeuvreFactory.getClockwiseDirection(currOrient)};
+    	ArrayList<WorldSpatial.Direction> possibleOrients = new ArrayList<WorldSpatial.Direction>();
+    	
+    	if (p.getTilesInPath().size() > 3) {
+			p.getTilesInPath().remove(0); // TODO: fix
+			list.add(p);
+			return;
+		}
+    	
+    	MapTile testTile = this.curView.get(ManoeuvreFactory.addCoords(currentPos, 
+    			ManoeuvreFactory.toCoordinate(ManoeuvreFactory.getClockwiseDirection(currOrient))));
+    	
+    	if (!testTile.getName().equals("Wall")) {
+    		
+    		testTile = this.curView.get(ManoeuvreFactory.addCoords(currentPos, ManoeuvreFactory.toCoordinate(currOrient)));
+    		
+    		if (testTile.getName().equals("Wall")) {
+    			possibleOrients.add(ManoeuvreFactory.getClockwiseDirection(currOrient));
+    		} else {
+    			possibleOrients.add(ManoeuvreFactory.getAntiClockwiseDirection(currOrient));
+    		}
+    		
+    		
+    		possibleOrients.add(currOrient);
+    	} else {
+    		possibleOrients.add(currOrient);
+    		possibleOrients.add(ManoeuvreFactory.getClockwiseDirection(currOrient));
+    	}
+    	
+    	
+    	
     	
     	int numNull = 0;
     	for (WorldSpatial.Direction d : possibleOrients) {
@@ -202,8 +237,7 @@ public class View {
     		Coordinate newPos = new Coordinate(coAdd.x + currentPos.x, coAdd.y + currentPos.y);
     		MapTile tile = this.curView.get(newPos);
     		
-    		if (tile == null || d == ManoeuvreFactory.getAntiClockwiseDirection(prevOrient) ||
-    				d == ManoeuvreFactory.getAntiClockwiseDirection(ManoeuvreFactory.getAntiClockwiseDirection(prevOrient))) {
+    		if (tile == null) {
     			numNull++;
     			continue;
     		}
@@ -212,12 +246,9 @@ public class View {
     	    	ArrayList<Coordinate> newCoords = new ArrayList<Coordinate>(p.getTilesInPath());
     	    	newCoords.add(newPos);
     	    	
-    	    	System.out.print("Path: ");
-    	    	for (Coordinate ck : newCoords) {
-    	    		System.out.print("(" + ck + "), ");
-    	    	}
-    	    	System.out.println();
-    	    	
+    	    	// for debugging purposes
+    	    	System.out.print("NewPath " + checkFollowingWall(currentPos) + " " + currentPos + " " + currOrient + " " + d + ": " + newCoords.toString() + "\n");
+
     	    	Path newPath = new Path(this.curView, newCoords, curDir);
     	    	recursive(list, newPath, currOrient, d);
     		} else {
@@ -225,8 +256,9 @@ public class View {
     		}
     	}
     	
-    	if (numNull == possibleOrients.length) {
+    	if (numNull == possibleOrients.size()) {
     		if (p.getTilesInPath().size() > 0) {
+    			p.getTilesInPath().remove(0); // TODO: fix
     			list.add(p);
     		}
     		
@@ -968,15 +1000,20 @@ public class View {
      *  It checks if there is wall to the left, if so, check the tile to the wall's right
      *  if that's not a wall, then there is a corner
      */
-    private boolean checkCornerEast(){
+    private boolean checkCornerEast(Coordinate pos){
         for(int i = 0; i < VIEW_SQUARE; i++){
-            Coordinate coor = new Coordinate(this.curPos.x + i, this.curPos.y);
+            Coordinate coor = new Coordinate(pos.x + i, pos.y);
             // check East with specific coordinate of a Wall
             for(int j = 0; j < VIEW_SQUARE; j++){
                 MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y+j));
+                
+                if (tile == null) {
+                	continue;
+                }
+                
                 if(tile.getName().equals("Wall")){
                     MapTile nextTile = this.curView.get(new Coordinate(coor.x+1, coor.y+j));
-                    if(!nextTile.getName().equals("Wall")){
+                    if(nextTile != null && !nextTile.getName().equals("Wall")){
                         return true;
                     }
                 }
@@ -986,15 +1023,20 @@ public class View {
         return false;
     }
 
-    private boolean checkCornerWest(){
+    private boolean checkCornerWest(Coordinate pos){
         for(int i = 0; i < VIEW_SQUARE; i++){
-            Coordinate coor = new Coordinate(this.curPos.x - i, this.curPos.y);
+            Coordinate coor = new Coordinate(pos.x - i, pos.y);
             // check West with specific coordinate of a Wall
             for(int j = 0; j < VIEW_SQUARE; j++){
                 MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y-j));
+                
+                if (tile == null) {
+                	continue;
+                }
+                
                 if(tile.getName().equals("Wall")){
                     MapTile nextTile = this.curView.get(new Coordinate(coor.x-1, coor.y-j));
-                    if(!nextTile.getName().equals("Wall")){
+                    if(nextTile != null && !nextTile.getName().equals("Wall")){
                         return true;
                     }
                 }
@@ -1004,15 +1046,20 @@ public class View {
         return false;
     }
 
-    private boolean checkCornerNorth(){
+    private boolean checkCornerNorth(Coordinate pos){
         for(int i = 0; i < VIEW_SQUARE; i++){
-            Coordinate coor = new Coordinate(this.curPos.x, this.curPos.y + i);
+            Coordinate coor = new Coordinate(pos.x, pos.y + i);
             // check North with specific coordinate of a Wall
             for(int j = 0; j < VIEW_SQUARE; j++){
                 MapTile tile = this.curView.get(new Coordinate(coor.x-j, coor.y));
+                
+                if (tile == null) {
+                	continue;
+                }
+                
                 if(tile.getName().equals("Wall")){
                     MapTile nextTile = this.curView.get(new Coordinate(coor.x-j, coor.y+1));
-                    if(!nextTile.getName().equals("Wall")){
+                    if(nextTile != null && !nextTile.getName().equals("Wall")){
                         return true;
                     }
                 }
@@ -1022,15 +1069,20 @@ public class View {
         return false;
     }
 
-    private boolean checkCornerSouth(){
+    private boolean checkCornerSouth(Coordinate pos){
         for(int i = 0; i < VIEW_SQUARE; i++){
-            Coordinate coor = new Coordinate(this.curPos.x, this.curPos.y - i);
+            Coordinate coor = new Coordinate(pos.x, pos.y - i);
             // check South with specific coordinate of a Wall
             for(int j = 0; j < VIEW_SQUARE; j++){
                 MapTile tile = this.curView.get(new Coordinate(coor.x+j, coor.y));
+                
+                if (tile == null) {
+                	continue;
+                }
+                
                 if(tile.getName().equals("Wall")){
                     MapTile nextTile = this.curView.get(new Coordinate(coor.x+j, coor.y-1));
-                    if(!nextTile.getName().equals("Wall")){
+                    if(nextTile != null && !nextTile.getName().equals("Wall")){
                         return true;
                     }
                 }
@@ -1050,9 +1102,9 @@ public class View {
      */
     private boolean checkEast(Coordinate coor){
         // Check tiles to my right
-        for(int i = 0; i <= wallSensitivity; i++){
+        for(int i = 0; i <= 1; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x+i, coor.y));
-            if(tile.getName().equals("Wall")){
+            if(tile != null && tile.getName().equals("Wall")){
                 return true;
             }
         }
@@ -1063,7 +1115,7 @@ public class View {
         // Check tiles to my left
         for(int i = 0; i <= wallSensitivity; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x-i, coor.y));
-            if(tile.getName().equals("Wall")){
+            if(tile != null && tile.getName().equals("Wall")){
                 return true;
             }
         }
@@ -1074,7 +1126,7 @@ public class View {
         // Check tiles to towards the top
         for(int i = 0; i <= wallSensitivity; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y+i));
-            if(tile.getName().equals("Wall")){
+            if(tile != null && tile.getName().equals("Wall")){
                 return true;
             }
         }
@@ -1085,7 +1137,7 @@ public class View {
         // Check tiles towards the bottom
         for(int i = 0; i <= wallSensitivity; i++){
             MapTile tile = this.curView.get(new Coordinate(coor.x, coor.y-i));
-            if(tile.getName().equals("Wall")){
+            if(tile != null && tile.getName().equals("Wall")){
                 return true;
             }
         }
