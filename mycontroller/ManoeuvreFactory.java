@@ -148,8 +148,7 @@ public class ManoeuvreFactory {
     	    } else if (angle <= WorldSpatial.SOUTH_DEGREE) {
     	    	orientation = Direction.SOUTH;
     	    }
-    		
-
+    	    
     	    ret.add(new Move(c, orientation, angle, false));
     	    
     	    // moving to new point 'c' leads us to the car's new current position

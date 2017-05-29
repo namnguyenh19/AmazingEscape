@@ -57,7 +57,7 @@ public class View {
     /**
      * Check if you have a wall in front of you!
      */
-    private boolean checkWallAhead(){
+    public boolean checkWallAhead(){
         switch(this.curDir){
             case EAST:
                 return checkEast(curPos);

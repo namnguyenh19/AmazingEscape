@@ -28,7 +28,7 @@ public class GrassHandler extends TrapHandler{
         	Direction nextDir = null;
         	
         	if (path.getTileName().get(c).equals("Grass")) {
-        		if (i < path.getTilesInPath().size()) {
+        		if (i+1 < path.getTilesInPath().size()) {
         			Coordinate next_c = path.getTilesInPath().get(i+1);
         			nextDir = ManoeuvreFactory.toDirection((int)ManoeuvreFactory.getAngleTwoPts(c, next_c));
         			
